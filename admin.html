@@ -1,0 +1,593 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SYBER MART Admin</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: Arial, sans-serif;
+      background: #f5f6f8;
+      color: #222;
+    }
+
+    .admin-header {
+      background: #111;
+      color: white;
+      padding: 18px 25px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .admin-header h1 {
+      font-size: 22px;
+    }
+
+    .admin-header span {
+      color: #ddd;
+      font-size: 14px;
+    }
+
+    .admin-container {
+      max-width: 1200px;
+      margin: 30px auto;
+      padding: 0 20px;
+    }
+
+    .welcome {
+      margin-bottom: 25px;
+    }
+
+    .welcome h2 {
+      margin-bottom: 6px;
+    }
+
+    .welcome p {
+      color: #666;
+    }
+
+    .dashboard-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 20px;
+      margin-bottom: 30px;
+    }
+
+    .stat-card {
+      background: white;
+      padding: 22px;
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    }
+
+    .stat-card h3 {
+      color: #777;
+      font-size: 14px;
+      margin-bottom: 10px;
+    }
+
+    .stat-card strong {
+      font-size: 28px;
+    }
+
+    .admin-section {
+      background: white;
+      padding: 25px;
+      border-radius: 12px;
+      margin-bottom: 25px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    }
+
+    .admin-section h2 {
+      margin-bottom: 10px;
+    }
+
+    .admin-section > p {
+      color: #666;
+      margin-bottom: 20px;
+    }
+
+    .admin-buttons {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .admin-btn {
+      background: #111;
+      color: white;
+      border: none;
+      padding: 12px 18px;
+      border-radius: 7px;
+      cursor: pointer;
+      font-size: 14px;
+    }
+
+    .admin-btn:hover {
+      background: #333;
+    }
+
+    .danger-btn {
+      background: #c62828;
+    }
+
+    /* ADD PRODUCT FORM */
+
+    #addProductPanel {
+      display: none;
+      margin-top: 25px;
+      border-top: 1px solid #eee;
+      padding-top: 25px;
+    }
+
+    .product-form {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 18px;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .form-group.full-width {
+      grid-column: 1 / -1;
+    }
+
+    .form-group label {
+      font-weight: bold;
+      margin-bottom: 7px;
+      font-size: 14px;
+    }
+
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+      width: 100%;
+      padding: 12px;
+      border: 1px solid #ccc;
+      border-radius: 7px;
+      font-size: 14px;
+      font-family: inherit;
+    }
+
+    .form-group textarea {
+      resize: vertical;
+      min-height: 100px;
+    }
+
+    .save-product-btn {
+      background: #111;
+      color: white;
+      border: none;
+      padding: 14px 20px;
+      border-radius: 7px;
+      cursor: pointer;
+      font-size: 15px;
+      font-weight: bold;
+    }
+
+    .save-product-btn:hover {
+      background: #333;
+    }
+
+    .save-product-btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    #productMessage {
+      margin-bottom: 15px;
+      font-size: 14px;
+      font-weight: bold;
+    }
+
+    .success-message {
+      color: #16803c;
+    }
+
+    .error-message {
+      color: #c62828;
+    }
+
+    @media (max-width: 800px) {
+      .dashboard-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .product-form {
+        grid-template-columns: 1fr;
+      }
+
+      .form-group.full-width {
+        grid-column: auto;
+      }
+    }
+
+    @media (max-width: 500px) {
+      .dashboard-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .admin-header {
+        padding: 15px;
+      }
+
+      .admin-container {
+        margin-top: 20px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <header class="admin-header">
+    <h1>SYBER MART ADMIN</h1>
+    <span id="adminEmail">Checking account...</span>
+  </header>
+
+  <main class="admin-container">
+
+    <div class="welcome">
+      <h2>Admin Dashboard</h2>
+      <p>Manage your SYBER MART marketplace from here.</p>
+    </div>
+
+    <div class="dashboard-grid">
+
+      <div class="stat-card">
+        <h3>Products</h3>
+        <strong id="productCount">0</strong>
+      </div>
+
+      <div class="stat-card">
+        <h3>Orders</h3>
+        <strong id="orderCount">0</strong>
+      </div>
+
+      <div class="stat-card">
+        <h3>Customers</h3>
+        <strong id="customerCount">0</strong>
+      </div>
+
+      <div class="stat-card">
+        <h3>Sellers</h3>
+        <strong id="sellerCount">0</strong>
+      </div>
+
+    </div>
+
+    <!-- PRODUCTS -->
+
+    <section class="admin-section">
+
+      <h2>📦 Product Management</h2>
+      <p>Add and manage products on SYBER MART.</p>
+
+      <div class="admin-buttons">
+        <button class="admin-btn" id="addProductBtn">
+          ➕ Add Product
+        </button>
+
+        <button class="admin-btn" id="manageProductsBtn">
+          📦 Manage Products
+        </button>
+      </div>
+      <div id="manageProductsPanel" style="display:none; margin-top:25px; border-top:1px solid #eee; padding-top:25px;">
+
+  <h3 style="margin-bottom:20px;">Manage Products</h3>
+
+  <p id="manageProductsMessage"></p>
+  <div id="editProductPanel" style="display:none; margin-bottom:25px; padding:20px; background:#f8f8f8; border-radius:10px;">
+
+  <h3 style="margin-bottom:20px;">✏️ Edit Product</h3>
+
+  <p id="editProductMessage"></p>
+
+  <form id="editProductForm">
+
+    <input type="hidden" id="editProductId">
+
+    <div class="product-form">
+
+      <div class="form-group">
+        <label for="editProductName">Product Name *</label>
+        <input type="text" id="editProductName" required>
+      </div>
+
+      <div class="form-group">
+        <label for="editProductCategory">Category *</label>
+        <select id="editProductCategory" required>
+          <option value="">Select category</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="editProductPrice">Price (GH₵) *</label>
+        <input type="number" id="editProductPrice" min="0" step="0.01" required>
+      </div>
+
+      <div class="form-group">
+        <label for="editProductOldPrice">Old Price (GH₵)</label>
+        <input type="number" id="editProductOldPrice" min="0" step="0.01">
+      </div>
+
+      <div class="form-group">
+        <label for="editProductStock">Stock *</label>
+        <input type="number" id="editProductStock" min="0" required>
+      </div>
+
+      <div class="form-group">
+        <label for="editProductBrand">Brand</label>
+        <input type="text" id="editProductBrand">
+      </div>
+
+      <div class="form-group">
+        <label for="editProductSKU">SKU</label>
+        <input type="text" id="editProductSKU">
+      </div>
+
+      <div class="form-group">
+        <label for="editProductImageFile">
+         Product Image
+        </label>
+
+        <input
+         type="file"
+         id="editProductImageFile"
+         accept="image/*"
+        >
+
+        <img
+         id="editProductImagePreview"
+         src=""
+         alt="Product image preview"
+         style="display:none; width:150px; height:150px; object-fit:cover; margin-top:10px; border-radius:10px;"
+        >
+      </div>
+
+      <div class="form-group full-width">
+        <label for="editProductDescription">Description</label>
+        <textarea id="editProductDescription"></textarea>
+      </div>
+
+      <div class="form-group">
+        <label for="editProductActive">Product Status</label>
+
+        <select id="editProductActive">
+          <option value="true">🟢 instock</option>
+          <option value="false">🔴 outofstock</option>
+        </select>
+      </div>
+
+      <div class="form-group full-width">
+
+        <button
+          type="submit"
+          class="save-product-btn"
+          id="updateProductBtn"
+        >
+          💾 Save Changes
+        </button>
+
+        <button
+          type="button"
+          class="admin-btn"
+          id="cancelEditBtn"
+          style="margin-left:10px;"
+        >
+          Cancel
+        </button>
+
+      </div>
+
+    </div>
+
+  </form>
+
+</div>
+
+  <div id="productsList">
+    <p>Loading products...</p>
+  </div>
+
+</div>
+
+      <!-- ADD PRODUCT FORM -->
+
+      <div id="addProductPanel">
+
+        <h3 style="margin-bottom:20px;">Add New Product</h3>
+
+        <p id="productMessage"></p>
+
+        <form id="productForm">
+
+          <div class="product-form">
+
+            <div class="form-group">
+              <label for="productName">Product Name *</label>
+              <input
+                type="text"
+                id="productName"
+                placeholder="e.g. Samsung Galaxy A16"
+                required
+              >
+            </div>
+
+            <div class="form-group">
+              <label for="productCategory">Category *</label>
+              <select id="productCategory" required>
+                <option value="">Select category</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label for="productPrice">Price (GH₵) *</label>
+              <input
+                type="number"
+                id="productPrice"
+                min="0"
+                step="0.01"
+                placeholder="1899"
+                required
+              >
+            </div>
+
+            <div class="form-group">
+              <label for="productOldPrice">Old Price (GH₵)</label>
+              <input
+                type="number"
+                id="productOldPrice"
+                min="0"
+                step="0.01"
+                placeholder="2099"
+              >
+            </div>
+
+            <div class="form-group">
+              <label for="productStock">Stock *</label>
+              <input
+                type="number"
+                id="productStock"
+                min="0"
+                value="1"
+                required
+              >
+            </div>
+
+            <div class="form-group">
+              <label for="productBrand">Brand</label>
+              <input
+                type="text"
+                id="productBrand"
+                placeholder="Samsung"
+              >
+            </div>
+
+            <div class="form-group">
+              <label for="productSKU">SKU</label>
+              <input
+                type="text"
+                id="productSKU"
+                placeholder="SAM-A16-001"
+              >
+            </div>
+
+            <div class="form-group">
+              <label for="productImageFile">
+               Product Image
+              </label>
+
+              <input
+               type="file"
+               id="productImageFile"
+               accept="image/*"
+               required
+              >
+
+              <img
+               id="productImagePreview"
+               src=""
+               alt="Product image preview"
+               style="display:none; width:150px; height:150px; object-fit:cover; margin-top:10px; border-radius:10px;"
+              >
+            </div>
+
+            <div class="form-group full-width">
+              <label for="productDescription">Description</label>
+              <textarea
+                id="productDescription"
+                placeholder="Describe the product..."
+              ></textarea>
+            </div>
+
+            <div class="form-group full-width">
+
+              <button
+                type="submit"
+                class="save-product-btn"
+                id="saveProductBtn"
+              >
+                ➕ Save Product
+              </button>
+
+            </div>
+
+          </div>
+
+        </form>
+
+      </div>
+
+    </section>
+
+    <!-- MESSAGES -->
+
+    <section class="admin-section">
+      <h2>💬 Messages</h2>
+      <p>Manage customer messages and enquiries.</p>
+
+      <div class="admin-buttons">
+        <button class="admin-btn" id="messagesBtn">
+          💬 View Messages
+        </button>
+      </div>
+    </section>
+
+    <!-- ORDERS -->
+
+    <section class="admin-section">
+      <h2>🛒 Orders</h2>
+      <p>View and manage customer orders.</p>
+
+      <div class="admin-buttons">
+        <button class="admin-btn" id="ordersBtn">
+          🛒 Manage Orders
+        </button>
+      </div>
+    </section>
+
+    <!-- USERS -->
+
+    <section class="admin-section">
+      <h2>👥 Users</h2>
+      <p>Manage customers and sellers.</p>
+
+      <div class="admin-buttons">
+
+        <button class="admin-btn" id="customersBtn">
+          👤 Customers
+        </button>
+
+        <button class="admin-btn" id="sellersBtn">
+          🏪 Sellers
+        </button>
+
+      </div>
+    </section>
+
+    <section class="admin-section">
+
+      <button class="admin-btn danger-btn" id="logoutBtn">
+        Logout
+      </button>
+
+    </section>
+
+  </main>
+
+  <script type="module" src="admin.js"></script>
+
+</body>
+</html>

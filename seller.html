@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>SYBER MART - Seller Dashboard</title>
+
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+  <header class="header">
+    <div class="logo">
+      <span>SYBER</span> MART
+    </div>
+
+    <div style="margin-left:auto; display:flex; align-items:center; gap:10px;">
+      <span id="sellerName">Seller</span>
+
+      <button id="logoutBtn" class="auth-btn">
+        Logout
+      </button>
+    </div>
+  </header>
+
+
+  <main style="max-width:1200px; margin:30px auto; padding:0 20px;">
+
+    <h1>Seller Dashboard</h1>
+
+    <p id="sellerMessage" style="margin:10px 0 25px;"></p>
+
+
+    <!-- Dashboard Stats -->
+
+    <div style="
+      display:grid;
+      grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
+      gap:15px;
+      margin-bottom:30px;
+    ">
+
+      <div class="admin-card">
+        <h3>Products</h3>
+        <p id="productCount">0</p>
+      </div>
+
+      <div class="admin-card">
+        <h3>Active Products</h3>
+        <p id="activeProductCount">0</p>
+      </div>
+
+      <div class="admin-card">
+        <h3>Orders</h3>
+        <p id="orderCount">0</p>
+      </div>
+
+      <div class="admin-card">
+        <h3>Sales</h3>
+        <p id="salesTotal">GH₵ 0.00</p>
+      </div>
+
+    </div>
+
+
+<!-- Add Product -->
+
+<section style="
+  background:#fff;
+  padding:25px;
+  border-radius:12px;
+  margin-bottom:30px;
+  box-shadow:0 2px 10px rgba(0,0,0,0.06);
+">
+
+  <h2>Add Product</h2>
+
+  <form id="sellerProductForm" class="product-form">
+
+    <div class="form-group">
+      <label for="productName">Product Name *</label>
+      <input type="text" id="productName" required>
+    </div>
+
+    <div class="form-group">
+      <label for="productCategory">Category *</label>
+      <select id="productCategory" required>
+        <option value="">Select category</option>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label for="productPrice">Price (GH₵) *</label>
+      <input
+        type="number"
+        id="productPrice"
+        min="0"
+        step="0.01"
+        required
+      >
+    </div>
+
+    <div class="form-group">
+      <label for="productOldPrice">Old Price (GH₵)</label>
+      <input
+        type="number"
+        id="productOldPrice"
+        min="0"
+        step="0.01"
+      >
+    </div>
+
+    <div class="form-group">
+      <label for="productStock">Stock *</label>
+      <input
+        type="number"
+        id="productStock"
+        min="0"
+        required
+      >
+    </div>
+
+    <div class="form-group">
+      <label for="productBrand">Brand</label>
+      <input
+        type="text"
+        id="productBrand"
+      >
+    </div>
+
+    <div class="form-group">
+      <label for="productSKU">SKU</label>
+      <input
+        type="text"
+        id="productSKU"
+      >
+    </div>
+
+    <!-- Product Image Upload -->
+
+    <div class="form-group">
+      <label for="productImageFile">
+        Product Image *
+      </label>
+
+      <input
+        type="file"
+        id="productImageFile"
+        accept="image/*"
+        required
+      >
+
+      <img
+        id="productImagePreview"
+        src=""
+        alt="Product image preview"
+        style="
+          display:none;
+          width:150px;
+          height:150px;
+          object-fit:cover;
+          margin-top:10px;
+          border-radius:10px;
+        "
+      >
+    </div>
+
+    <div class="form-group full-width">
+      <label for="productDescription">
+        Description
+      </label>
+
+      <textarea
+        id="productDescription"
+      ></textarea>
+    </div>
+
+    <div class="form-group full-width">
+      <button
+        type="submit"
+        class="save-product-btn"
+        id="saveProductBtn"
+      >
+        ➕ Add Product
+      </button>
+    </div>
+
+  </form>
+
+  <p id="productMessage"></p>
+
+</section>
+
+
+    <!-- My Products -->
+
+    <section style="
+      background:#fff;
+      padding:25px;
+      border-radius:12px;
+      margin-bottom:30px;
+      box-shadow:0 2px 10px rgba(0,0,0,0.06);
+    ">
+
+      <h2>My Products</h2>
+
+      <div id="sellerProductsList">
+        <p>Loading products...</p>
+      </div>
+
+    </section>
+
+
+    <!-- Orders -->
+
+    <section style="
+      background:#fff;
+      padding:25px;
+      border-radius:12px;
+      margin-bottom:30px;
+      box-shadow:0 2px 10px rgba(0,0,0,0.06);
+    ">
+
+      <h2>My Orders</h2>
+
+      <div id="sellerOrdersList">
+        <p>Loading orders...</p>
+      </div>
+
+    </section>
+
+  </main>
+
+
+  <script type="module" src="seller.js"></script>
+
+</body>
+</html>s

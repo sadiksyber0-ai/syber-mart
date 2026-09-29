@@ -1,0 +1,670 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>SYBER MART - Online Marketplace</title>
+
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+  <!-- ============================= -->
+  <!-- HEADER -->
+  <!-- ============================= -->
+
+  <header class="header">
+
+    <div class="container header-content">
+
+      <a href="#" class="logo">
+        SYBER <span>MART</span>
+      </a>
+
+      <!-- SEARCH -->
+
+      <div class="search-box">
+
+        <input
+          type="search"
+          id="searchInput"
+          placeholder="Search products..."
+        >
+
+        <button id="searchBtn">
+          Search
+        </button>
+
+      </div>
+
+
+      <!-- HEADER ACTIONS -->
+
+      <div class="header-actions">
+
+        <!-- ACCOUNT -->
+
+        <div class="account-wrapper">
+
+          <button id="loginBtn">
+            Login
+          </button>
+
+
+          <!-- ACCOUNT MENU -->
+
+          <div id="accountMenu" class="account-menu">
+
+            <div class="account-header">
+
+              <div class="account-avatar">
+                👤
+              </div>
+
+              <div>
+
+                <strong id="accountName">
+                  My Account
+                </strong>
+
+                <small id="accountEmail"></small>
+
+              </div>
+
+            </div>
+
+
+            <!-- BECOME SELLER -->
+
+            <button
+              id="becomeSellerBtn"
+              type="button"
+            >
+              🏪 Become a Seller
+            </button>
+
+
+            <!-- PROFILE -->
+
+            <button id="profileBtn">
+              👤 My Profile
+            </button>
+
+
+            <!-- ORDERS -->
+
+            <button id="ordersBtn">
+              📦 My Orders
+            </button>
+
+
+            <!-- WISHLIST -->
+
+            <button id="wishlistBtn">
+              ❤️ Wishlist
+            </button>
+
+
+            <!-- LOGOUT -->
+
+            <button
+              id="logoutBtn"
+              class="logout-btn"
+            >
+              🚪 Log Out
+            </button>
+
+          </div>
+
+        </div>
+
+
+        <!-- CART -->
+
+        <button id="cartBtn">
+
+          🛒 Cart
+
+          <span id="cartCount">
+            0
+          </span>
+
+        </button>
+
+      </div>
+
+    </div>
+
+  </header>
+
+
+  <!-- ============================= -->
+  <!-- CATEGORIES -->
+  <!-- ============================= -->
+
+  <section class="categories-section">
+
+    <div class="container">
+
+      <h2>
+        Shop by Category
+      </h2>
+
+      <div
+        id="categories"
+        class="categories"
+      >
+
+        <p>
+          Loading categories...
+        </p>
+
+      </div>
+
+    </div>
+
+  </section>
+
+
+  <!-- ============================= -->
+  <!-- PRODUCTS -->
+  <!-- ============================= -->
+
+  <main class="container">
+
+    <div class="products-heading">
+
+      <h2>
+        Featured Products
+      </h2>
+
+      <span id="productCount"></span>
+
+    </div>
+
+
+    <div
+      id="products"
+      class="products"
+    >
+
+      <p>
+        Loading products...
+      </p>
+
+    </div>
+
+  </main>
+
+
+  <!-- ============================= -->
+  <!-- LOGIN / SIGNUP MODAL -->
+  <!-- ============================= -->
+
+  <div
+    id="authModal"
+    class="modal"
+  >
+
+    <div class="auth-box">
+
+      <button
+        id="closeAuth"
+        class="close-btn"
+      >
+        &times;
+      </button>
+
+
+      <h2 id="authTitle">
+        Login to SYBER MART
+      </h2>
+
+
+      <p id="authMessage"></p>
+
+
+      <form id="authForm">
+
+        <!-- FULL NAME -->
+
+        <div
+          id="nameField"
+          class="form-group"
+          style="display:none;"
+        >
+
+          <label for="fullName">
+            Full Name
+          </label>
+
+          <input
+            type="text"
+            id="fullName"
+            placeholder="Enter your full name"
+          >
+
+        </div>
+
+
+        <!-- EMAIL -->
+
+        <div class="form-group">
+
+          <label for="email">
+            Email
+          </label>
+
+          <input
+            type="email"
+            id="email"
+            placeholder="Enter your email"
+            required
+          >
+
+        </div>
+
+
+        <!-- PASSWORD -->
+
+        <div class="form-group">
+
+          <label for="password">
+            Password
+          </label>
+
+          <input
+            type="password"
+            id="password"
+            placeholder="Enter your password"
+            minlength="6"
+            required
+          >
+
+        </div>
+
+
+        <!-- LOGIN / SIGNUP -->
+
+        <button
+          type="submit"
+          id="authSubmit"
+          class="auth-submit"
+        >
+          Login
+        </button>
+
+      </form>
+
+
+      <!-- SWITCH LOGIN / SIGNUP -->
+
+      <button
+        id="switchAuth"
+        class="switch-auth"
+        type="button"
+      >
+        Don't have an account? Create one
+      </button>
+
+
+      <!-- SELLER SIGNUP -->
+
+      <button
+        id="sellerSignupBtn"
+        class="switch-auth"
+        type="button"
+      >
+        🏪 Become a Seller
+      </button>
+
+    </div>
+
+  </div>
+
+
+  <!-- ============================= -->
+  <!-- CHECKOUT MODAL -->
+  <!-- ============================= -->
+
+  <div
+    id="checkoutModal"
+    class="modal"
+  >
+
+    <div class="auth-box checkout-box">
+
+      <button
+        id="closeCheckout"
+        class="close-btn"
+      >
+        &times;
+      </button>
+
+
+      <h2>
+        Checkout
+      </h2>
+
+
+      <p id="checkoutMessage"></p>
+
+
+      <!-- NAME -->
+
+      <div class="form-group">
+
+        <label for="deliveryName">
+          Full Name
+        </label>
+
+        <input
+          type="text"
+          id="deliveryName"
+          placeholder="Enter your full name"
+          required
+        >
+
+      </div>
+
+
+      <!-- PHONE -->
+
+      <div class="form-group">
+
+        <label for="deliveryPhone">
+          Phone Number
+        </label>
+
+        <input
+          type="tel"
+          id="deliveryPhone"
+          placeholder="e.g. 0241234567"
+          required
+        >
+
+      </div>
+
+
+      <!-- ADDRESS -->
+
+      <div class="form-group">
+
+        <label for="deliveryAddress">
+          Delivery Address
+        </label>
+
+        <textarea
+          id="deliveryAddress"
+          placeholder="Enter your delivery address"
+          rows="3"
+          required
+        ></textarea>
+
+      </div>
+
+
+      <!-- CITY -->
+
+      <div class="form-group">
+
+        <label for="deliveryCity">
+          City
+        </label>
+
+        <input
+          type="text"
+          id="deliveryCity"
+          placeholder="e.g. Accra"
+          required
+        >
+
+      </div>
+
+
+      <!-- TOTAL -->
+
+      <div class="checkout-total">
+
+        <strong>
+          Order Total:
+        </strong>
+
+        <span id="checkoutTotal">
+          GH₵ 0.00
+        </span>
+
+      </div>
+
+
+      <button
+        id="placeOrderBtn"
+        class="auth-submit"
+      >
+        Place Order
+      </button>
+
+    </div>
+
+  </div>
+
+
+  <!-- ============================= -->
+  <!-- ORDERS MODAL -->
+  <!-- ============================= -->
+
+  <div
+    id="ordersModal"
+    class="modal"
+  >
+
+    <div class="auth-box orders-box">
+
+      <button
+        id="closeOrders"
+        class="close-btn"
+      >
+        &times;
+      </button>
+
+
+      <h2>
+        My Orders
+      </h2>
+
+
+      <div id="ordersList">
+
+        <p>
+          Loading orders...
+        </p>
+
+      </div>
+
+    </div>
+
+  </div>
+
+
+  <!-- ============================= -->
+  <!-- PROFILE MODAL -->
+  <!-- ============================= -->
+
+  <div
+    id="profileModal"
+    class="modal"
+  >
+
+    <div class="auth-box profile-box">
+
+      <button
+        id="closeProfile"
+        class="close-btn"
+      >
+        &times;
+      </button>
+
+
+      <h2>
+        My Profile
+      </h2>
+
+
+      <p id="profileMessage"></p>
+
+
+      <!-- FULL NAME -->
+
+      <div class="form-group">
+
+        <label for="profileName">
+          Full Name
+        </label>
+
+        <input
+          type="text"
+          id="profileName"
+          placeholder="Enter your full name"
+        >
+
+      </div>
+
+
+      <!-- EMAIL -->
+
+      <div class="form-group">
+
+        <label for="profileEmail">
+          Email
+        </label>
+
+        <input
+          type="email"
+          id="profileEmail"
+          readonly
+        >
+
+      </div>
+
+
+      <!-- PHONE -->
+
+      <div class="form-group">
+
+        <label for="profilePhone">
+          Phone Number
+        </label>
+
+        <input
+          type="tel"
+          id="profilePhone"
+          placeholder="e.g. 0241234567"
+        >
+
+      </div>
+
+
+      <!-- SAVE -->
+
+      <button
+        id="saveProfileBtn"
+        class="auth-submit"
+      >
+        Save Changes
+      </button>
+
+    </div>
+
+  </div>
+
+
+  <!-- ============================= -->
+  <!-- CART MODAL -->
+  <!-- ============================= -->
+
+  <div
+    id="cartModal"
+    class="modal"
+  >
+
+    <div class="auth-box cart-box">
+
+      <button
+        id="closeCart"
+        class="close-btn"
+      >
+        &times;
+      </button>
+
+
+      <h2>
+        Your Cart
+      </h2>
+
+
+      <div id="cartItems">
+
+        <p>
+          Loading cart...
+        </p>
+
+      </div>
+
+
+      <div class="cart-total">
+
+        <strong>
+          Total:
+        </strong>
+
+        <span id="cartTotal">
+          GH₵ 0.00
+        </span>
+
+      </div>
+
+
+      <button
+        id="checkoutBtn"
+        class="auth-submit"
+      >
+        Proceed to Checkout
+      </button>
+
+    </div>
+
+  </div>
+
+
+  <!-- ============================= -->
+  <!-- FOOTER -->
+  <!-- ============================= -->
+
+  <footer>
+
+    <div class="container">
+
+      <p>
+        ©️ 2026 SYBER MART. All rights reserved.
+      </p>
+
+    </div>
+
+  </footer>
+
+
+  <!-- ============================= -->
+  <!-- JAVASCRIPT -->
+  <!-- ============================= -->
+
+  <script
+    type="module"
+    src="app.js"
+  ></script>
+
+</body>
+
+</html>
