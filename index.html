@@ -7,55 +7,126 @@
 
   <title>SYBER MART - Online Marketplace</title>
 
+  <meta
+    name="description"
+    content="Shop quality products at great prices on SYBER MART."
+  >
+
   <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
+
   <!-- =====================================================
-     MOBILE BOTTOM NAVIGATION
-===================================================== -->
+       MOBILE BOTTOM NAVIGATION
+  ====================================================== -->
 
-<nav class="bottom-nav" id="bottomNav">
+  <nav class="bottom-nav" id="bottomNav">
 
-    <button class="bottom-nav-item active" id="bottomHomeBtn">
-        <span class="bottom-icon">⌂</span>
-        <span>Home</span>
+    <button
+      class="bottom-nav-item active"
+      id="bottomHomeBtn"
+      type="button"
+    >
+      <span class="bottom-icon">⌂</span>
+      <span>Home</span>
     </button>
 
-    <button class="bottom-nav-item" id="bottomCategoriesBtn">
-        <span class="bottom-icon">☷</span>
-        <span>Categories</span>
+    <button
+      class="bottom-nav-item"
+      id="bottomCategoriesBtn"
+      type="button"
+    >
+      <span class="bottom-icon">☷</span>
+      <span>Categories</span>
     </button>
 
-    <button class="bottom-nav-item" id="bottomCartBtn">
-        <span class="bottom-icon">🛒</span>
-        <span>Cart</span>
-        <span class="bottom-cart-badge" id="bottomCartCount">0</span>
+    <button
+      class="bottom-nav-item"
+      id="bottomCartBtn"
+      type="button"
+    >
+      <span class="bottom-icon">🛒</span>
+      <span>Cart</span>
+      <span
+        class="bottom-cart-badge"
+        id="bottomCartCount"
+      >0</span>
     </button>
 
-    <button class="bottom-nav-item" id="bottomWishlistBtn">
-        <span class="bottom-icon">♡</span>
-        <span>Wishlist</span>
+    <button
+      class="bottom-nav-item"
+      id="bottomWishlistBtn"
+      type="button"
+    >
+      <span class="bottom-icon">♡</span>
+      <span>Wishlist</span>
     </button>
 
-    <button class="bottom-nav-item" id="bottomAccountBtn">
-        <span class="bottom-icon">♙</span>
-        <span>Account</span>
+    <button
+      class="bottom-nav-item"
+      id="bottomAccountBtn"
+      type="button"
+    >
+      <span class="bottom-icon">♙</span>
+      <span>Account</span>
     </button>
 
-</nav>
+  </nav>
 
-  <!-- ============================= -->
-  <!-- HEADER -->
-  <!-- ============================= -->
+
+  <!-- =====================================================
+       TOP BAR
+  ====================================================== -->
+
+  <div class="top-bar">
+
+    <div class="container top-bar-content">
+
+      <div>
+        Welcome to
+        <strong>SYBER MART</strong>
+      </div>
+
+      <div class="top-bar-right">
+
+        <span>
+          🚚 Free delivery on selected orders
+        </span>
+
+        <span>
+          🔒 Secure payment
+        </span>
+
+        <span>
+          📞 Customer support
+        </span>
+
+      </div>
+
+    </div>
+
+  </div>
+
+
+  <!-- =====================================================
+       HEADER
+  ====================================================== -->
 
   <header class="header">
 
     <div class="container header-content">
 
-      <a href="#" class="logo">
+      <!-- LOGO -->
+
+      <a
+        href="#"
+        class="logo"
+        id="logoHomeBtn"
+      >
         SYBER <span>MART</span>
       </a>
+
 
       <!-- SEARCH -->
 
@@ -64,11 +135,16 @@
         <input
           type="search"
           id="searchInput"
-          placeholder="Search products..."
+          placeholder="Search products, brands and categories..."
+          autocomplete="off"
         >
 
-        <button id="searchBtn">
-          Search
+        <button
+          id="searchBtn"
+          type="button"
+          aria-label="Search"
+        >
+          🔍
         </button>
 
       </div>
@@ -78,18 +154,38 @@
 
       <div class="header-actions">
 
+        <!-- WISHLIST -->
+
+        <button
+          id="headerWishlistBtn"
+          type="button"
+          class="header-action-btn"
+        >
+          <span class="header-action-icon">♡</span>
+          <span>Wishlist</span>
+        </button>
+
+
         <!-- ACCOUNT -->
 
         <div class="account-wrapper">
 
-          <button id="loginBtn">
-            Login
+          <button
+            id="loginBtn"
+            type="button"
+            class="header-action-btn"
+          >
+            <span class="header-action-icon">♙</span>
+            <span>Login</span>
           </button>
 
 
           <!-- ACCOUNT MENU -->
 
-          <div id="accountMenu" class="account-menu">
+          <div
+            id="accountMenu"
+            class="account-menu"
+          >
 
             <div class="account-header">
 
@@ -110,8 +206,6 @@
             </div>
 
 
-            <!-- BECOME SELLER -->
-
             <button
               id="becomeSellerBtn"
               type="button"
@@ -120,32 +214,34 @@
             </button>
 
 
-            <!-- PROFILE -->
-
-            <button id="profileBtn">
+            <button
+              id="profileBtn"
+              type="button"
+            >
               👤 My Profile
             </button>
 
 
-            <!-- ORDERS -->
-
-            <button id="ordersBtn">
+            <button
+              id="ordersBtn"
+              type="button"
+            >
               📦 My Orders
             </button>
 
 
-            <!-- WISHLIST -->
-
-            <button id="wishlistBtn">
+            <button
+              id="wishlistBtn"
+              type="button"
+            >
               ❤️ Wishlist
             </button>
 
 
-            <!-- LOGOUT -->
-
             <button
               id="logoutBtn"
               class="logout-btn"
+              type="button"
             >
               🚪 Log Out
             </button>
@@ -157,11 +253,24 @@
 
         <!-- CART -->
 
-        <button id="cartBtn">
+        <button
+          id="cartBtn"
+          type="button"
+          class="header-action-btn cart-header-btn"
+        >
 
-          🛒 Cart
+          <span class="header-action-icon">
+            🛒
+          </span>
 
-          <span id="cartCount">
+          <span>
+            Cart
+          </span>
+
+          <span
+            id="cartCount"
+            class="cart-count"
+          >
             0
           </span>
 
@@ -171,20 +280,247 @@
 
     </div>
 
+
+    <!-- =================================================
+         MAIN NAVIGATION
+    ================================================== -->
+
+    <div class="desktop-navigation">
+
+      <div class="container navigation-content">
+
+        <button
+          id="allCategoriesBtn"
+          class="all-categories-btn"
+          type="button"
+        >
+          ☰
+          <span>All Categories</span>
+        </button>
+
+        <nav class="main-nav">
+
+          <a
+            href="#"
+            id="homeNavBtn"
+          >
+            Home
+          </a>
+
+          <a href="#products">
+            Shop
+          </a>
+
+          <a href="#categories">
+            Categories
+          </a>
+
+          <a href="#products">
+            Deals
+            <span class="hot-badge">HOT</span>
+          </a>
+
+          <a href="#about">
+            About Us
+          </a>
+
+          <a href="#footer">
+            Contact
+          </a>
+
+        </nav>
+
+        <div class="navigation-benefit">
+          🛡️ 100% Secure Shopping
+        </div>
+
+      </div>
+
+    </div>
+
   </header>
 
 
-  <!-- ============================= -->
-  <!-- CATEGORIES -->
-  <!-- ============================= -->
+  <!-- =====================================================
+       HERO SECTION
+  ====================================================== -->
 
-  <section class="categories-section">
+  <section class="hero-section">
+
+    <div class="container hero-content">
+
+      <div class="hero-text">
+
+        <span class="hero-small-text">
+          WELCOME TO SYBER MART
+        </span>
+
+        <h1>
+          Shop Smart.
+          <br>
+          Shop
+          <span>SYBER MART.</span>
+        </h1>
+
+        <p>
+          Discover quality products at great prices.
+          Fast delivery, secure payment and great service.
+        </p>
+
+        <div class="hero-buttons">
+
+          <button
+            id="heroShopBtn"
+            class="primary-btn"
+            type="button"
+          >
+            🛍️ Shop Now
+          </button>
+
+          <button
+            id="heroDealsBtn"
+            class="secondary-btn"
+            type="button"
+          >
+            🏷️ View Deals
+          </button>
+
+        </div>
+
+      </div>
+
+
+      <div class="hero-visual">
+
+        <div class="hero-circle"></div>
+
+        <div class="hero-shopping-card">
+
+          <div class="hero-shopping-icon">
+            🛍️
+          </div>
+
+          <strong>
+            BEST PRICES
+          </strong>
+
+          <span>
+            GUARANTEED
+          </span>
+
+        </div>
+
+      </div>
+
+    </div>
+
+  </section>
+
+
+  <!-- =====================================================
+       TRUST / BENEFITS
+  ====================================================== -->
+
+  <section class="benefits-section">
+
+    <div class="container benefits-container">
+
+      <div class="benefit-item">
+
+        <span class="benefit-icon">
+          🚚
+        </span>
+
+        <div>
+          <strong>
+            Fast Delivery
+          </strong>
+
+          <small>
+            Get your orders quickly
+          </small>
+        </div>
+
+      </div>
+
+
+      <div class="benefit-item">
+
+        <span class="benefit-icon">
+          🛡️
+        </span>
+
+        <div>
+          <strong>
+            Secure Payment
+          </strong>
+
+          <small>
+            100% secure payments
+          </small>
+        </div>
+
+      </div>
+
+
+      <div class="benefit-item">
+
+        <span class="benefit-icon">
+          ↻
+        </span>
+
+        <div>
+          <strong>
+            Easy Returns
+          </strong>
+
+          <small>
+            Shop with confidence
+          </small>
+        </div>
+
+      </div>
+
+    </div>
+
+  </section>
+
+
+  <!-- =====================================================
+       CATEGORIES
+  ====================================================== -->
+
+  <section
+    class="categories-section"
+    id="categoriesSection"
+  >
 
     <div class="container">
 
-      <h2>
-        Shop by Category
-      </h2>
+      <div class="section-heading">
+
+        <div>
+
+          <span class="section-label">
+            EXPLORE
+          </span>
+
+          <h2>
+            Shop by Category
+          </h2>
+
+        </div>
+
+        <button
+          id="viewAllCategoriesBtn"
+          type="button"
+          class="view-all-btn"
+        >
+          View all categories →
+        </button>
+
+      </div>
+
 
       <div
         id="categories"
@@ -202,19 +538,42 @@
   </section>
 
 
-  <!-- ============================= -->
-  <!-- PRODUCTS -->
-  <!-- ============================= -->
+  <!-- =====================================================
+       PRODUCTS
+  ====================================================== -->
 
-  <main class="container">
+  <main
+    class="container products-main"
+    id="productsSection"
+  >
 
-    <div class="products-heading">
+    <div class="section-heading products-heading">
 
-      <h2>
-        Featured Products
-      </h2>
+      <div>
 
-      <span id="productCount"></span>
+        <span class="section-label">
+          SHOP NOW
+        </span>
+
+        <h2>
+          Featured Products
+        </h2>
+
+      </div>
+
+      <div class="products-heading-right">
+
+        <span id="productCount"></span>
+
+        <button
+          id="viewAllProductsBtn"
+          type="button"
+          class="view-all-btn"
+        >
+          View all products →
+        </button>
+
+      </div>
 
     </div>
 
@@ -233,9 +592,240 @@
   </main>
 
 
-  <!-- ============================= -->
-  <!-- LOGIN / SIGNUP MODAL -->
-  <!-- ============================= -->
+  <!-- =====================================================
+       PRODUCT DETAILS MODAL
+  ====================================================== -->
+
+  <div
+    id="productDetailsModal"
+    class="modal product-details-modal"
+  >
+
+    <div class="product-details-box">
+
+      <button
+        id="closeProductDetails"
+        class="product-details-close"
+        type="button"
+        aria-label="Close"
+      >
+        &times;
+      </button>
+
+
+      <div class="product-details-grid">
+
+        <!-- PRODUCT IMAGE -->
+
+        <div class="product-details-images">
+
+          <div
+            id="productDetailsThumbnails"
+            class="product-thumbnails"
+          >
+          </div>
+
+          <div class="product-main-image-wrapper">
+
+            <img
+              id="productDetailsImage"
+              class="product-details-image"
+              src=""
+              alt="Product"
+            >
+
+          </div>
+
+        </div>
+
+
+        <!-- PRODUCT INFORMATION -->
+
+        <div class="product-details-info">
+
+          <div
+            id="productDetailsCategory"
+            class="product-details-category"
+          >
+          </div>
+
+          <h2 id="productDetailsName">
+            Product Name
+          </h2>
+
+
+          <div class="product-rating-row">
+
+            <span
+              id="productDetailsRating"
+              class="product-rating"
+            >
+              ★★★★★
+            </span>
+
+            <span
+              id="productDetailsReviews"
+              class="product-reviews"
+            >
+              Reviews
+            </span>
+
+          </div>
+
+
+          <div class="product-details-price-row">
+
+            <strong id="productDetailsPrice">
+              GH₵ 0.00
+            </strong>
+
+            <span
+              id="productDetailsOldPrice"
+              class="product-old-price"
+            >
+            </span>
+
+            <span
+              id="productDetailsDiscount"
+              class="product-discount"
+            >
+            </span>
+
+          </div>
+
+
+          <div
+            id="productDetailsStock"
+            class="product-stock"
+          >
+            ● In Stock
+          </div>
+
+
+          <div
+            id="productDetailsDescription"
+            class="product-description"
+          >
+            Product description
+          </div>
+
+
+          <!-- PRODUCT SPECIFICATIONS -->
+
+          <div class="product-specifications">
+
+            <h3>
+              Product Information
+            </h3>
+
+            <div
+              id="productDetailsSpecs"
+              class="product-specs-list"
+            >
+            </div>
+
+          </div>
+
+
+          <!-- QUANTITY -->
+
+          <div class="product-quantity-section">
+
+            <span>
+              Quantity
+            </span>
+
+            <div class="quantity-selector">
+
+              <button
+                id="productQuantityMinus"
+                type="button"
+              >
+                −
+              </button>
+
+              <input
+                id="productQuantity"
+                type="number"
+                value="1"
+                min="1"
+                readonly
+              >
+
+              <button
+                id="productQuantityPlus"
+                type="button"
+              >
+                +
+              </button>
+
+            </div>
+
+          </div>
+
+
+          <!-- ACTION BUTTONS -->
+
+          <div class="product-details-actions">
+
+            <button
+              id="productDetailsAddCart"
+              class="product-add-cart-btn"
+              type="button"
+            >
+              🛒 Add to Cart
+            </button>
+
+            <button
+              id="productDetailsWishlist"
+              class="product-wishlist-action"
+              type="button"
+            >
+              ♡ Add to Wishlist
+            </button>
+
+          </div>
+
+
+          <!-- SHOPPING BENEFITS -->
+
+          <div class="product-detail-benefits">
+
+            <div>
+              🚚
+              <strong>
+                Fast Delivery
+              </strong>
+            </div>
+
+            <div>
+              🛡️
+              <strong>
+                Secure Payment
+              </strong>
+            </div>
+
+            <div>
+              ↻
+              <strong>
+                Easy Returns
+              </strong>
+            </div>
+
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+
+  </div>
+
+
+  <!-- =====================================================
+       LOGIN / SIGNUP MODAL
+  ====================================================== -->
 
   <div
     id="authModal"
@@ -247,6 +837,7 @@
       <button
         id="closeAuth"
         class="close-btn"
+        type="button"
       >
         &times;
       </button>
@@ -261,8 +852,6 @@
 
 
       <form id="authForm">
-
-        <!-- FULL NAME -->
 
         <div
           id="nameField"
@@ -283,8 +872,6 @@
         </div>
 
 
-        <!-- EMAIL -->
-
         <div class="form-group">
 
           <label for="email">
@@ -300,8 +887,6 @@
 
         </div>
 
-
-        <!-- PASSWORD -->
 
         <div class="form-group">
 
@@ -320,8 +905,6 @@
         </div>
 
 
-        <!-- LOGIN / SIGNUP -->
-
         <button
           type="submit"
           id="authSubmit"
@@ -333,8 +916,6 @@
       </form>
 
 
-      <!-- SWITCH LOGIN / SIGNUP -->
-
       <button
         id="switchAuth"
         class="switch-auth"
@@ -343,8 +924,6 @@
         Don't have an account? Create one
       </button>
 
-
-      <!-- SELLER SIGNUP -->
 
       <button
         id="sellerSignupBtn"
@@ -359,9 +938,9 @@
   </div>
 
 
-  <!-- ============================= -->
-  <!-- CHECKOUT MODAL -->
-  <!-- ============================= -->
+  <!-- =====================================================
+       CHECKOUT MODAL
+  ====================================================== -->
 
   <div
     id="checkoutModal"
@@ -373,6 +952,7 @@
       <button
         id="closeCheckout"
         class="close-btn"
+        type="button"
       >
         &times;
       </button>
@@ -385,8 +965,6 @@
 
       <p id="checkoutMessage"></p>
 
-
-      <!-- NAME -->
 
       <div class="form-group">
 
@@ -404,8 +982,6 @@
       </div>
 
 
-      <!-- PHONE -->
-
       <div class="form-group">
 
         <label for="deliveryPhone">
@@ -421,8 +997,6 @@
 
       </div>
 
-
-      <!-- ADDRESS -->
 
       <div class="form-group">
 
@@ -440,8 +1014,6 @@
       </div>
 
 
-      <!-- CITY -->
-
       <div class="form-group">
 
         <label for="deliveryCity">
@@ -457,8 +1029,6 @@
 
       </div>
 
-
-      <!-- TOTAL -->
 
       <div class="checkout-total">
 
@@ -476,8 +1046,9 @@
       <button
         id="placeOrderBtn"
         class="auth-submit"
+        type="button"
       >
-        Place Order
+        Pay with Paystack
       </button>
 
     </div>
@@ -485,9 +1056,9 @@
   </div>
 
 
-  <!-- ============================= -->
-  <!-- ORDERS MODAL -->
-  <!-- ============================= -->
+  <!-- =====================================================
+       ORDERS MODAL
+  ====================================================== -->
 
   <div
     id="ordersModal"
@@ -499,6 +1070,7 @@
       <button
         id="closeOrders"
         class="close-btn"
+        type="button"
       >
         &times;
       </button>
@@ -522,9 +1094,9 @@
   </div>
 
 
-  <!-- ============================= -->
-  <!-- PROFILE MODAL -->
-  <!-- ============================= -->
+  <!-- =====================================================
+       PROFILE MODAL
+  ====================================================== -->
 
   <div
     id="profileModal"
@@ -536,6 +1108,7 @@
       <button
         id="closeProfile"
         class="close-btn"
+        type="button"
       >
         &times;
       </button>
@@ -548,8 +1121,6 @@
 
       <p id="profileMessage"></p>
 
-
-      <!-- FULL NAME -->
 
       <div class="form-group">
 
@@ -566,8 +1137,6 @@
       </div>
 
 
-      <!-- EMAIL -->
-
       <div class="form-group">
 
         <label for="profileEmail">
@@ -582,8 +1151,6 @@
 
       </div>
 
-
-      <!-- PHONE -->
 
       <div class="form-group">
 
@@ -600,11 +1167,10 @@
       </div>
 
 
-      <!-- SAVE -->
-
       <button
         id="saveProfileBtn"
         class="auth-submit"
+        type="button"
       >
         Save Changes
       </button>
@@ -614,9 +1180,9 @@
   </div>
 
 
-  <!-- ============================= -->
-  <!-- CART MODAL -->
-  <!-- ============================= -->
+  <!-- =====================================================
+       CART MODAL
+  ====================================================== -->
 
   <div
     id="cartModal"
@@ -628,6 +1194,7 @@
       <button
         id="closeCart"
         class="close-btn"
+        type="button"
       >
         &times;
       </button>
@@ -663,6 +1230,7 @@
       <button
         id="checkoutBtn"
         class="auth-submit"
+        type="button"
       >
         Proceed to Checkout
       </button>
@@ -672,26 +1240,94 @@
   </div>
 
 
-  <!-- ============================= -->
-  <!-- FOOTER -->
-  <!-- ============================= -->
+  <!-- =====================================================
+       FOOTER
+  ====================================================== -->
 
-  <footer>
+  <footer id="footer">
 
-    <div class="container">
+    <div class="container footer-content">
 
-      <p>
-        ©️ 2026 SYBER MART. All rights reserved.
-      </p>
+      <div class="footer-brand">
+
+        <div class="logo">
+          SYBER <span>MART</span>
+        </div>
+
+        <p>
+          Your trusted online marketplace for quality
+          products at great prices.
+        </p>
+
+      </div>
+
+
+      <div class="footer-links">
+
+        <div>
+
+          <h4>
+            Customer Service
+          </h4>
+
+          <a href="#products">
+            Shop Products
+          </a>
+
+          <a href="#categories">
+            Categories
+          </a>
+
+          <a href="#">
+            My Orders
+          </a>
+
+        </div>
+
+
+        <div>
+
+          <h4>
+            Information
+          </h4>
+
+          <a href="#">
+            About SYBER MART
+          </a>
+
+          <a href="#">
+            Delivery
+          </a>
+
+          <a href="#">
+            Contact Us
+          </a>
+
+        </div>
+
+      </div>
+
+    </div>
+
+
+    <div class="footer-bottom">
+
+      <div class="container">
+
+        <p>
+          © 2026 SYBER MART. All rights reserved.
+        </p>
+
+      </div>
 
     </div>
 
   </footer>
 
 
-  <!-- ============================= -->
-  <!-- JAVASCRIPT -->
-  <!-- ============================= -->
+  <!-- =====================================================
+       JAVASCRIPT
+  ====================================================== -->
 
   <script
     type="module"
