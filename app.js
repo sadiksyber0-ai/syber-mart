@@ -20,8 +20,10 @@ let allProducts = [];
 let signupMode = false;
 let sellerSignupMode = false;
 
-/* Wishlist product IDs */
 let wishlistProductIds = new Set();
+
+/* Currently opened product */
+let selectedProduct = null;
 
 
 /* =========================================================
@@ -117,6 +119,68 @@ const placeOrderBtn = document.getElementById('placeOrderBtn');
 
 
 /* =========================================================
+   PRODUCT DETAILS ELEMENTS
+========================================================= */
+
+const productDetailsModal =
+  document.getElementById('productDetailsModal');
+
+const closeProductDetails =
+  document.getElementById('closeProductDetails');
+
+const productDetailsThumbnails =
+  document.getElementById('productDetailsThumbnails');
+
+const productDetailsImage =
+  document.getElementById('productDetailsImage');
+
+const productDetailsCategory =
+  document.getElementById('productDetailsCategory');
+
+const productDetailsName =
+  document.getElementById('productDetailsName');
+
+const productDetailsRating =
+  document.getElementById('productDetailsRating');
+
+const productDetailsReviews =
+  document.getElementById('productDetailsReviews');
+
+const productDetailsPrice =
+  document.getElementById('productDetailsPrice');
+
+const productDetailsOldPrice =
+  document.getElementById('productDetailsOldPrice');
+
+const productDetailsDiscount =
+  document.getElementById('productDetailsDiscount');
+
+const productDetailsStock =
+  document.getElementById('productDetailsStock');
+
+const productDetailsDescription =
+  document.getElementById('productDetailsDescription');
+
+const productDetailsSpecs =
+  document.getElementById('productDetailsSpecs');
+
+const productQuantityMinus =
+  document.getElementById('productQuantityMinus');
+
+const productQuantity =
+  document.getElementById('productQuantity');
+
+const productQuantityPlus =
+  document.getElementById('productQuantityPlus');
+
+const productDetailsAddCart =
+  document.getElementById('productDetailsAddCart');
+
+const productDetailsWishlist =
+  document.getElementById('productDetailsWishlist');
+
+
+/* =========================================================
    MOBILE BOTTOM NAVIGATION
 ========================================================= */
 
@@ -182,6 +246,142 @@ const fallbackImage =
 
 
 /* =========================================================
+   HELPER FUNCTIONS
+========================================================= */
+
+/*
+  Escape text before putting database values into HTML.
+  This also protects the storefront from unexpected HTML.
+*/
+
+function escapeHtml(value) {
+
+  return String(value ?? '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+
+}
+
+
+/*
+  Get a usable product image.
+*/
+
+function getProductImage(product) {
+
+  return product?.image_url || fallbackImage;
+
+}
+
+
+/*
+  Convert a possible number to a real number.
+*/
+
+function numberValue(value, fallback = 0) {
+
+  const number = Number(value);
+
+  return Number.isFinite(number)
+    ? number
+    : fallback;
+
+}
+
+
+/*
+  Find a product in our currently loaded products.
+*/
+
+function findProduct(productId) {
+
+  return allProducts.find(
+    product =>
+      String(product.id) === String(productId)
+  );
+
+}
+
+
+/*
+  Get optional product gallery images.
+
+  This supports several possible database formats without
+  requiring you to change your products table immediately.
+*/
+
+function getProductImages(product) {
+
+  const images = [];
+
+  if (product?.image_url) {
+    images.push(product.image_url);
+  }
+
+  if (Array.isArray(product?.images)) {
+
+    product.images.forEach(image => {
+
+      if (typeof image === 'string') {
+        images.push(image);
+      }
+
+    });
+
+  }
+
+  if (Array.isArray(product?.image_urls)) {
+
+    product.image_urls.forEach(image => {
+
+      if (typeof image === 'string') {
+        images.push(image);
+      }
+
+    });
+
+  }
+
+  if (typeof product?.images === 'string') {
+
+    try {
+
+      const parsed =
+        JSON.parse(product.images);
+
+      if (Array.isArray(parsed)) {
+
+        parsed.forEach(image => {
+
+          if (typeof image === 'string') {
+            images.push(image);
+          }
+
+        });
+
+      }
+
+    } catch {
+
+      /* Ignore invalid JSON */
+
+    }
+
+  }
+
+  return [
+    ...new Set(
+      images.filter(Boolean)
+    )
+  ];
+
+}
+
+
+/* =========================================================
    LOAD CATEGORIES
 ========================================================= */
 
@@ -194,11 +394,16 @@ async function loadCategories() {
 
   if (error) {
 
-    console.error('Category error:', error);
+    console.error(
+      'Category error:',
+      error
+    );
 
     if (categoriesContainer) {
+
       categoriesContainer.innerHTML =
         '<p>Unable to load categories.</p>';
+
     }
 
     return;
@@ -207,7 +412,9 @@ async function loadCategories() {
   if (!categoriesContainer) return;
 
   categoriesContainer.innerHTML = `
-    <button class="category" data-category="all">
+    <button
+      class="category"
+      data-category="all">
       All Products
     </button>
   `;
@@ -217,40 +424,53 @@ async function loadCategories() {
     categoriesContainer.innerHTML += `
       <button
         class="category"
-        data-category="${category.id}">
-        ${category.name}
+        data-category="${escapeHtml(category.id)}">
+        ${escapeHtml(category.name)}
       </button>
     `;
 
   });
 
+
   document
     .querySelectorAll('.category')
     .forEach(button => {
 
-      button.addEventListener('click', () => {
+      button.addEventListener(
+        'click',
+        () => {
 
-        const categoryId =
-          button.dataset.category;
+          const categoryId =
+            button.dataset.category;
 
-        if (categoryId === 'all') {
+          if (categoryId === 'all') {
 
-          displayProducts(allProducts);
+            displayProducts(allProducts);
 
-        } else {
+          } else {
 
-          const filtered =
-            allProducts.filter(
-              product =>
-                String(product.category_id) ===
-                String(categoryId)
-            );
+            const filtered =
+              allProducts.filter(
+                product =>
+                  String(product.category_id) ===
+                  String(categoryId)
+              );
 
-          displayProducts(filtered);
+            displayProducts(filtered);
+
+          }
+
+          if (productsContainer) {
+
+            productsContainer.scrollIntoView({
+              behavior: 'smooth',
+              block: 'start'
+            });
+
+          }
 
         }
-
-      });
+      );
 
     });
 
@@ -264,11 +484,16 @@ async function loadCategories() {
 async function loadProducts() {
 
   if (productsContainer) {
+
     productsContainer.innerHTML =
       '<p>Loading products...</p>';
+
   }
 
-  const { data, error } = await supabase
+  const {
+    data,
+    error
+  } = await supabase
     .from('products')
     .select(`
       *,
@@ -283,11 +508,16 @@ async function loadProducts() {
 
   if (error) {
 
-    console.error('Product error:', error);
+    console.error(
+      'Product error:',
+      error
+    );
 
     if (productsContainer) {
+
       productsContainer.innerHTML =
         '<p>Unable to load products. Check the browser console.</p>';
+
     }
 
     return;
@@ -308,38 +538,74 @@ function displayProducts(products) {
 
   if (!productsContainer) return;
 
-  productCount.textContent =
-    `${products.length} product${products.length === 1 ? '' : 's'}`;
+  const productList =
+    Array.isArray(products)
+      ? products
+      : [];
 
-  if (products.length === 0) {
+  if (productCount) {
+
+    productCount.textContent =
+      `${productList.length} product${
+        productList.length === 1
+          ? ''
+          : 's'
+      }`;
+
+  }
+
+
+  if (productList.length === 0) {
 
     productsContainer.innerHTML =
       '<p>No products found.</p>';
 
     return;
+
   }
+
 
   productsContainer.innerHTML = '';
 
-  products.forEach(product => {
+
+  productList.forEach(product => {
 
     const image =
-      product.image_url || fallbackImage;
+      getProductImage(product);
 
     const isWishlisted =
       wishlistProductIds.has(
         String(product.id)
       );
 
+    const price =
+      numberValue(product.price);
+
+
     productsContainer.innerHTML += `
 
-      <article class="product" style="position:relative;">
+      <article
+        class="product"
+        data-product-id="${escapeHtml(product.id)}"
+        style="position:relative; cursor:pointer;"
+      >
 
         <button
-          class="product-wishlist-btn ${isWishlisted ? 'active' : ''}"
-          data-product-id="${product.id}"
-          aria-label="${isWishlisted ? 'Remove from wishlist' : 'Add to wishlist'}"
-          title="${isWishlisted ? 'Remove from wishlist' : 'Add to wishlist'}"
+          class="product-wishlist-btn ${
+            isWishlisted ? 'active' : ''
+          }"
+          data-product-id="${escapeHtml(product.id)}"
+          aria-label="${
+            isWishlisted
+              ? 'Remove from wishlist'
+              : 'Add to wishlist'
+          }"
+          title="${
+            isWishlisted
+              ? 'Remove from wishlist'
+              : 'Add to wishlist'
+          }"
+          type="button"
           style="
             position:absolute;
             top:10px;
@@ -355,31 +621,60 @@ function displayProducts(products) {
             font-size:25px;
             line-height:40px;
             padding:0;
-            color:${isWishlisted ? '#ff3b30' : '#222'};
-          ">
-          ${isWishlisted ? '♥' : '♡'}
+            color:${
+              isWishlisted
+                ? '#ff3b30'
+                : '#222'
+            };
+          "
+        >
+          ${
+            isWishlisted
+              ? '♥'
+              : '♡'
+          }
         </button>
+
 
         <img
           class="product-image"
-          src="${image}"
-          alt="${product.name}"
-          onerror="this.onerror=null; this.src='${fallbackImage}';"
+          src="${escapeHtml(image)}"
+          alt="${escapeHtml(product.name)}"
+          onerror="
+            this.onerror=null;
+            this.src='${fallbackImage}';
+          "
         >
+
 
         <div class="product-info">
 
           <h3 class="product-name">
-            ${product.name}
+            ${escapeHtml(product.name)}
           </h3>
 
+
+          ${
+            product.brand
+              ? `
+                <small class="product-brand">
+                  ${escapeHtml(product.brand)}
+                </small>
+              `
+              : ''
+          }
+
+
           <p class="product-price">
-            GH₵ ${Number(product.price).toFixed(2)}
+            GH₵ ${price.toFixed(2)}
           </p>
+
 
           <button
             class="add-cart"
-            data-product-id="${product.id}">
+            data-product-id="${escapeHtml(product.id)}"
+            type="button"
+          >
             Add to Cart
           </button>
 
@@ -392,42 +687,1019 @@ function displayProducts(products) {
   });
 
 
-  /* ADD TO CART BUTTONS */
+  /* =====================================================
+     PRODUCT DETAILS CLICK
+  ===================================================== */
+
+  document
+    .querySelectorAll('.product')
+    .forEach(card => {
+
+      card.addEventListener(
+        'click',
+        event => {
+
+          if (
+            event.target.closest(
+              '.product-wishlist-btn'
+            )
+          ) {
+            return;
+          }
+
+          if (
+            event.target.closest(
+              '.add-cart'
+            )
+          ) {
+            return;
+          }
+
+          openProductDetails(
+            card.dataset.productId
+          );
+
+        }
+      );
+
+    });
+
+
+  /* =====================================================
+     ADD TO CART BUTTONS
+  ===================================================== */
 
   document
     .querySelectorAll('.add-cart')
     .forEach(button => {
 
-      button.addEventListener('click', () => {
+      button.addEventListener(
+        'click',
+        event => {
 
-        addToCart(
-          button.dataset.productId
-        );
+          event.stopPropagation();
 
-      });
+          addToCart(
+            button.dataset.productId,
+            1
+          );
+
+        }
+      );
 
     });
 
 
-  /* WISHLIST BUTTONS */
+  /* =====================================================
+     WISHLIST BUTTONS
+  ===================================================== */
 
   document
     .querySelectorAll('.product-wishlist-btn')
     .forEach(button => {
 
-      button.addEventListener('click', event => {
+      button.addEventListener(
+        'click',
+        event => {
 
-        event.stopPropagation();
+          event.stopPropagation();
 
-        toggleWishlist(
-          button.dataset.productId
-        );
+          toggleWishlist(
+            button.dataset.productId
+          );
 
-      });
+        }
+      );
 
     });
 
 }
+
+
+/* =========================================================
+   PRODUCT DETAILS
+========================================================= */
+
+function openProductDetails(productId) {
+
+  const product =
+    findProduct(productId);
+
+  if (!product) {
+
+    console.error(
+      'Product not found:',
+      productId
+    );
+
+    return;
+
+  }
+
+  selectedProduct = product;
+
+
+  if (!productDetailsModal) {
+    return;
+  }
+
+
+  /* =====================================================
+     BASIC INFORMATION
+  ===================================================== */
+
+  const categoryName =
+    product.categories?.name ||
+    product.category_name ||
+    'Product';
+
+
+  const price =
+    numberValue(product.price);
+
+
+  const stock =
+    numberValue(product.stock);
+
+
+  const description =
+    product.description ||
+    'No product description is available yet.';
+
+
+  if (productDetailsCategory) {
+
+    productDetailsCategory.textContent =
+      categoryName;
+
+  }
+
+
+  if (productDetailsName) {
+
+    productDetailsName.textContent =
+      product.name || 'Product';
+
+  }
+
+
+  if (productDetailsPrice) {
+
+    productDetailsPrice.textContent =
+      `GH₵ ${price.toFixed(2)}`;
+
+  }
+
+
+  if (productDetailsDescription) {
+
+    productDetailsDescription.textContent =
+      description;
+
+  }
+
+
+  /* =====================================================
+     STOCK
+  ===================================================== */
+
+  if (productDetailsStock) {
+
+    if (stock > 0) {
+
+      productDetailsStock.textContent =
+        `● ${stock} available`;
+
+      productDetailsStock.classList.remove(
+        'out-of-stock'
+      );
+
+      productDetailsStock.classList.add(
+        'in-stock'
+      );
+
+    } else {
+
+      productDetailsStock.textContent =
+        '● Out of stock';
+
+      productDetailsStock.classList.remove(
+        'in-stock'
+      );
+
+      productDetailsStock.classList.add(
+        'out-of-stock'
+      );
+
+    }
+
+  }
+
+
+  /* =====================================================
+     RATING
+  ===================================================== */
+
+  const rating =
+    numberValue(
+      product.rating ??
+      product.average_rating ??
+      0
+    );
+
+
+  const reviewCount =
+    numberValue(
+      product.reviews_count ??
+      product.review_count ??
+      product.reviews ??
+      0
+    );
+
+
+  if (productDetailsRating) {
+
+    if (rating > 0) {
+
+      const rounded =
+        Math.min(
+          5,
+          Math.max(
+            0,
+            Math.round(rating)
+          )
+        );
+
+      productDetailsRating.textContent =
+        '★'.repeat(rounded) +
+        '☆'.repeat(5 - rounded);
+
+    } else {
+
+      productDetailsRating.textContent =
+        '★★★★★';
+
+    }
+
+  }
+
+
+  if (productDetailsReviews) {
+
+    if (reviewCount > 0) {
+
+      productDetailsReviews.textContent =
+        `${reviewCount} review${
+          reviewCount === 1
+            ? ''
+            : 's'
+        }`;
+
+    } else {
+
+      productDetailsReviews.textContent =
+        'No reviews yet';
+
+    }
+
+  }
+
+
+  /* =====================================================
+     OLD PRICE / DISCOUNT
+  ===================================================== */
+
+  const oldPrice =
+    numberValue(
+      product.old_price ??
+      product.compare_at_price ??
+      product.original_price ??
+      0
+    );
+
+
+  let discount =
+    numberValue(
+      product.discount_percentage ??
+      product.discount ??
+      0
+    );
+
+
+  if (
+    !discount &&
+    oldPrice > price &&
+    oldPrice > 0
+  ) {
+
+    discount =
+      Math.round(
+        ((oldPrice - price) /
+          oldPrice) *
+          100
+      );
+
+  }
+
+
+  if (productDetailsOldPrice) {
+
+    if (oldPrice > price) {
+
+      productDetailsOldPrice.textContent =
+        `GH₵ ${oldPrice.toFixed(2)}`;
+
+      productDetailsOldPrice.style.display =
+        'inline';
+
+    } else {
+
+      productDetailsOldPrice.textContent =
+        '';
+
+      productDetailsOldPrice.style.display =
+        'none';
+
+    }
+
+  }
+
+
+  if (productDetailsDiscount) {
+
+    if (discount > 0) {
+
+      productDetailsDiscount.textContent =
+        `-${Math.round(discount)}%`;
+
+      productDetailsDiscount.style.display =
+        'inline';
+
+    } else {
+
+      productDetailsDiscount.textContent =
+        '';
+
+      productDetailsDiscount.style.display =
+        'none';
+
+    }
+
+  }
+
+
+  /* =====================================================
+     SPECIFICATIONS
+  ===================================================== */
+
+  renderProductSpecifications(product);
+
+
+  /* =====================================================
+     PRODUCT IMAGES
+  ===================================================== */
+
+  renderProductImages(product);
+
+
+  /* =====================================================
+     QUANTITY
+  ===================================================== */
+
+  if (productQuantity) {
+
+    productQuantity.value =
+      stock > 0
+        ? '1'
+        : '0';
+
+  }
+
+
+  if (productDetailsAddCart) {
+
+    productDetailsAddCart.disabled =
+      stock <= 0;
+
+    productDetailsAddCart.textContent =
+      stock > 0
+        ? '🛒 Add to Cart'
+        : 'Out of Stock';
+
+  }
+
+
+  /* =====================================================
+     WISHLIST BUTTON
+  ===================================================== */
+
+  updateProductDetailsWishlistButton();
+
+
+  /* =====================================================
+     SHOW MODAL
+  ===================================================== */
+
+  productDetailsModal.classList.add(
+    'show'
+  );
+
+  document.body.classList.add(
+    'no-scroll'
+  );
+
+}
+
+
+/* =========================================================
+   PRODUCT IMAGES
+========================================================= */
+
+function renderProductImages(product) {
+
+  if (!productDetailsImage) {
+    return;
+  }
+
+
+  const images =
+    getProductImages(product);
+
+
+  const usableImages =
+    images.length
+      ? images
+      : [fallbackImage];
+
+
+  productDetailsImage.src =
+    usableImages[0];
+
+  productDetailsImage.alt =
+    product.name || 'Product';
+
+
+  productDetailsImage.onerror =
+    function () {
+
+      this.onerror = null;
+      this.src = fallbackImage;
+
+    };
+
+
+  if (!productDetailsThumbnails) {
+    return;
+  }
+
+
+  productDetailsThumbnails.innerHTML =
+    '';
+
+
+  usableImages.forEach(
+    (image, index) => {
+
+      const thumbnail =
+        document.createElement(
+          'button'
+        );
+
+      thumbnail.type =
+        'button';
+
+      thumbnail.className =
+        'product-thumbnail';
+
+      if (index === 0) {
+
+        thumbnail.classList.add(
+          'active'
+        );
+
+      }
+
+
+      const thumbnailImage =
+        document.createElement(
+          'img'
+        );
+
+      thumbnailImage.src =
+        image;
+
+      thumbnailImage.alt =
+        `${product.name || 'Product'} image ${
+          index + 1
+        }`;
+
+
+      thumbnailImage.onerror =
+        function () {
+
+          this.onerror = null;
+          this.src = fallbackImage;
+
+        };
+
+
+      thumbnail.appendChild(
+        thumbnailImage
+      );
+
+
+      thumbnail.addEventListener(
+        'click',
+        () => {
+
+          productDetailsImage.src =
+            image;
+
+          document
+            .querySelectorAll(
+              '.product-thumbnail'
+            )
+            .forEach(item => {
+
+              item.classList.remove(
+                'active'
+              );
+
+            });
+
+          thumbnail.classList.add(
+            'active'
+          );
+
+        }
+      );
+
+
+      productDetailsThumbnails.appendChild(
+        thumbnail
+      );
+
+    }
+  );
+
+}
+
+
+/* =========================================================
+   PRODUCT SPECIFICATIONS
+========================================================= */
+
+function renderProductSpecifications(product) {
+
+  if (!productDetailsSpecs) {
+    return;
+  }
+
+
+  const specifications = [];
+
+
+  /*
+    These fields are optional.
+    If your products table contains them,
+    they will automatically appear.
+  */
+
+  if (product.brand) {
+
+    specifications.push([
+      'Brand',
+      product.brand
+    ]);
+
+  }
+
+
+  if (product.sku) {
+
+    specifications.push([
+      'SKU',
+      product.sku
+    ]);
+
+  }
+
+
+  if (product.category_name) {
+
+    specifications.push([
+      'Category',
+      product.category_name
+    ]);
+
+  } else if (product.categories?.name) {
+
+    specifications.push([
+      'Category',
+      product.categories.name
+    ]);
+
+  }
+
+
+  if (product.condition) {
+
+    specifications.push([
+      'Condition',
+      product.condition
+    ]);
+
+  }
+
+
+  if (product.color) {
+
+    specifications.push([
+      'Color',
+      product.color
+    ]);
+
+  }
+
+
+  if (product.size) {
+
+    specifications.push([
+      'Size',
+      product.size
+    ]);
+
+  }
+
+
+  if (product.weight) {
+
+    specifications.push([
+      'Weight',
+      product.weight
+    ]);
+
+  }
+
+
+  if (product.material) {
+
+    specifications.push([
+      'Material',
+      product.material
+    ]);
+
+  }
+
+
+  if (product.stock !== undefined) {
+
+    specifications.push([
+      'Availability',
+      numberValue(product.stock) > 0
+        ? 'In Stock'
+        : 'Out of Stock'
+    ]);
+
+  }
+
+
+  if (specifications.length === 0) {
+
+    productDetailsSpecs.innerHTML = `
+      <div class="product-spec-row">
+        <span>Product</span>
+        <strong>
+          ${escapeHtml(
+            product.name || 'SYBER MART Product'
+          )}
+        </strong>
+      </div>
+
+      <div class="product-spec-row">
+        <span>Availability</span>
+        <strong>
+          ${
+            numberValue(product.stock) > 0
+              ? 'In Stock'
+              : 'Out of Stock'
+          }
+        </strong>
+      </div>
+    `;
+
+    return;
+
+  }
+
+
+  productDetailsSpecs.innerHTML =
+    specifications
+      .map(
+        ([label, value]) => `
+          <div class="product-spec-row">
+
+            <span>
+              ${escapeHtml(label)}
+            </span>
+
+            <strong>
+              ${escapeHtml(value)}
+            </strong>
+
+          </div>
+        `
+      )
+      .join('');
+
+}
+
+
+/* =========================================================
+   UPDATE DETAILS WISHLIST BUTTON
+========================================================= */
+
+function updateProductDetailsWishlistButton() {
+
+  if (
+    !productDetailsWishlist ||
+    !selectedProduct
+  ) {
+    return;
+  }
+
+
+  const isWishlisted =
+    wishlistProductIds.has(
+      String(selectedProduct.id)
+    );
+
+
+  if (isWishlisted) {
+
+    productDetailsWishlist.textContent =
+      '♥ Remove from Wishlist';
+
+    productDetailsWishlist.classList.add(
+      'active'
+    );
+
+  } else {
+
+    productDetailsWishlist.textContent =
+      '♡ Add to Wishlist';
+
+    productDetailsWishlist.classList.remove(
+      'active'
+    );
+
+  }
+
+}
+
+
+/* =========================================================
+   CLOSE PRODUCT DETAILS
+========================================================= */
+
+function closeProductDetailsModal() {
+
+  productDetailsModal?.classList.remove(
+    'show'
+  );
+
+  document.body.classList.remove(
+    'no-scroll'
+  );
+
+  selectedProduct = null;
+
+}
+
+
+closeProductDetails?.addEventListener(
+  'click',
+  closeProductDetailsModal
+);
+
+
+productDetailsModal?.addEventListener(
+  'click',
+  event => {
+
+    if (
+      event.target ===
+      productDetailsModal
+    ) {
+
+      closeProductDetailsModal();
+
+    }
+
+  }
+);
+
+
+/* =========================================================
+   PRODUCT QUANTITY MINUS
+========================================================= */
+
+productQuantityMinus?.addEventListener(
+  'click',
+  () => {
+
+    if (!selectedProduct) return;
+
+    const stock =
+      numberValue(
+        selectedProduct.stock
+      );
+
+    let quantity =
+      numberValue(
+        productQuantity?.value,
+        1
+      );
+
+
+    quantity =
+      Math.max(
+        1,
+        quantity - 1
+      );
+
+
+    if (stock > 0) {
+
+      quantity =
+        Math.min(
+          quantity,
+          stock
+        );
+
+    }
+
+
+    if (productQuantity) {
+
+      productQuantity.value =
+        String(quantity);
+
+    }
+
+  }
+);
+
+
+/* =========================================================
+   PRODUCT QUANTITY PLUS
+========================================================= */
+
+productQuantityPlus?.addEventListener(
+  'click',
+  () => {
+
+    if (!selectedProduct) return;
+
+    const stock =
+      numberValue(
+        selectedProduct.stock
+      );
+
+
+    if (stock <= 0) {
+
+      alert(
+        'This product is out of stock.'
+      );
+
+      return;
+
+    }
+
+
+    let quantity =
+      numberValue(
+        productQuantity?.value,
+        1
+      );
+
+
+    if (quantity >= stock) {
+
+      alert(
+        'You have reached the available stock.'
+      );
+
+      return;
+
+    }
+
+
+    quantity += 1;
+
+
+    if (productQuantity) {
+
+      productQuantity.value =
+        String(quantity);
+
+    }
+
+  }
+);
+
+
+/* =========================================================
+   ADD PRODUCT DETAILS ITEM TO CART
+========================================================= */
+
+productDetailsAddCart?.addEventListener(
+  'click',
+  async () => {
+
+    if (!selectedProduct) {
+      return;
+    }
+
+
+    const quantity =
+      Math.max(
+        1,
+        numberValue(
+          productQuantity?.value,
+          1
+        )
+      );
+
+
+    const stock =
+      numberValue(
+        selectedProduct.stock
+      );
+
+
+    if (stock <= 0) {
+
+      alert(
+        'This product is currently out of stock.'
+      );
+
+      return;
+
+    }
+
+
+    if (quantity > stock) {
+
+      alert(
+        'The selected quantity is greater than the available stock.'
+      );
+
+      return;
+
+    }
+
+
+    const success =
+      await addToCart(
+        selectedProduct.id,
+        quantity
+      );
+
+
+    if (success) {
+
+      closeProductDetailsModal();
+
+    }
+
+  }
+);
+
+
+/* =========================================================
+   PRODUCT DETAILS WISHLIST
+========================================================= */
+
+productDetailsWishlist?.addEventListener(
+  'click',
+  async () => {
+
+    if (!selectedProduct) {
+      return;
+    }
+
+
+    await toggleWishlist(
+      selectedProduct.id
+    );
+
+
+    updateProductDetailsWishlistButton();
+
+  }
+);
 
 
 /* =========================================================
@@ -439,34 +1711,53 @@ function searchProducts() {
   if (!searchInput) return;
 
   const searchTerm =
-    searchInput.value.trim().toLowerCase();
+    searchInput.value
+      .trim()
+      .toLowerCase();
+
 
   if (!searchTerm) {
 
-    displayProducts(allProducts);
+    displayProducts(
+      allProducts
+    );
 
     return;
+
   }
 
+
   const results =
-    allProducts.filter(product => {
+    allProducts.filter(
+      product => {
 
-      const name =
-        product.name?.toLowerCase() || '';
+        const name =
+          product.name?.toLowerCase() ||
+          '';
 
-      const description =
-        product.description?.toLowerCase() || '';
+        const description =
+          product.description?.toLowerCase() ||
+          '';
 
-      const brand =
-        product.brand?.toLowerCase() || '';
+        const brand =
+          product.brand?.toLowerCase() ||
+          '';
 
-      return (
-        name.includes(searchTerm) ||
-        description.includes(searchTerm) ||
-        brand.includes(searchTerm)
-      );
+        const category =
+          product.categories?.name?.toLowerCase() ||
+          '';
 
-    });
+
+        return (
+          name.includes(searchTerm) ||
+          description.includes(searchTerm) ||
+          brand.includes(searchTerm) ||
+          category.includes(searchTerm)
+        );
+
+      }
+    );
+
 
   displayProducts(results);
 
@@ -497,21 +1788,111 @@ searchInput?.addEventListener(
    ADD TO CART
 ========================================================= */
 
-async function addToCart(productId) {
+async function addToCart(
+  productId,
+  requestedQuantity = 1
+) {
 
   const {
     data: { user }
   } = await supabase.auth.getUser();
 
+
   if (!user) {
 
-    authModal.classList.add('show');
+    if (authMessage) {
 
-    authMessage.textContent =
-      'Please log in to add products to your cart.';
+      authMessage.textContent =
+        'Please log in to add products to your cart.';
 
-    return;
+    }
+
+    authModal?.classList.add(
+      'show'
+    );
+
+    return false;
+
   }
+
+
+  const quantityToAdd =
+    Math.max(
+      1,
+      Number(requestedQuantity) || 1
+    );
+
+
+  /* =====================================================
+     GET PRODUCT STOCK
+  ===================================================== */
+
+  const {
+    data: product,
+    error: productError
+  } = await supabase
+    .from('products')
+    .select('id, name, stock, is_active')
+    .eq('id', productId)
+    .maybeSingle();
+
+
+  if (productError) {
+
+    console.error(
+      'Product stock error:',
+      productError
+    );
+
+    alert(
+      'Could not check product availability.'
+    );
+
+    return false;
+
+  }
+
+
+  if (!product) {
+
+    alert(
+      'This product could not be found.'
+    );
+
+    return false;
+
+  }
+
+
+  if (product.is_active === false) {
+
+    alert(
+      'This product is no longer available.'
+    );
+
+    return false;
+
+  }
+
+
+  const stock =
+    numberValue(product.stock);
+
+
+  if (stock <= 0) {
+
+    alert(
+      'This product is out of stock.'
+    );
+
+    return false;
+
+  }
+
+
+  /* =====================================================
+     CHECK EXISTING CART ITEM
+  ===================================================== */
 
   const {
     data: existing,
@@ -523,57 +1904,123 @@ async function addToCart(productId) {
     .eq('product_id', productId)
     .maybeSingle();
 
+
   if (existingError) {
 
-    console.error(existingError);
+    console.error(
+      'Cart check error:',
+      existingError
+    );
 
-    alert('Could not check your cart.');
+    alert(
+      `Could not check your cart.\n\n${existingError.message}`
+    );
 
-    return;
+    return false;
+
   }
+
+
+  const currentQuantity =
+    Number(
+      existing?.quantity || 0
+    );
+
+
+  const newQuantity =
+    currentQuantity +
+    quantityToAdd;
+
+
+  if (newQuantity > stock) {
+
+    alert(
+      `Only ${stock} ${
+        stock === 1
+          ? 'unit is'
+          : 'units are'
+      } available.`
+    );
+
+    return false;
+
+  }
+
+
+  /* =====================================================
+     UPDATE OR INSERT
+  ===================================================== */
 
   if (existing) {
 
-    const { error } = await supabase
+    const {
+      error
+    } = await supabase
       .from('cart_items')
       .update({
-        quantity: existing.quantity + 1
+        quantity: newQuantity
       })
-      .eq('id', existing.id);
+      .eq('id', existing.id)
+      .eq('user_id', user.id);
+
 
     if (error) {
 
-      console.error(error);
+      console.error(
+        'Cart update error:',
+        error
+      );
 
-      alert('Could not update your cart.');
+      alert(
+        `Could not update your cart.\n\n${error.message}`
+      );
 
-      return;
+      return false;
+
     }
 
   } else {
 
-    const { error } = await supabase
+    const {
+      error
+    } = await supabase
       .from('cart_items')
       .insert({
         user_id: user.id,
         product_id: productId,
-        quantity: 1
+        quantity: quantityToAdd
       });
+
 
     if (error) {
 
-      console.error(error);
+      console.error(
+        'Cart insert error:',
+        error
+      );
 
-      alert('Could not add product to cart.');
+      alert(
+        `Could not add product to cart.\n\n${error.message}`
+      );
 
-      return;
+      return false;
+
     }
 
   }
 
+
   await updateCartCount();
 
-  alert('Product added to cart!');
+
+  alert(
+    quantityToAdd === 1
+      ? 'Product added to cart!'
+      : `${quantityToAdd} products added to cart!`
+  );
+
+
+  return true;
 
 }
 
@@ -588,6 +2035,7 @@ async function updateCartCount() {
     data: { user }
   } = await supabase.auth.getUser();
 
+
   if (!user) {
 
     if (cartCount) {
@@ -599,33 +2047,50 @@ async function updateCartCount() {
     }
 
     return;
+
   }
 
-  const { data, error } = await supabase
+
+  const {
+    data,
+    error
+  } = await supabase
     .from('cart_items')
     .select('quantity')
     .eq('user_id', user.id);
 
+
   if (error) {
 
-    console.error(error);
+    console.error(
+      'Cart count error:',
+      error
+    );
 
     return;
+
   }
+
 
   const count =
     (data || []).reduce(
       (total, item) =>
-        total + Number(item.quantity || 0),
+        total +
+        Number(
+          item.quantity || 0
+        ),
       0
     );
 
+
   if (cartCount) {
-    cartCount.textContent = count;
+    cartCount.textContent =
+      count;
   }
 
   if (bottomCartCount) {
-    bottomCartCount.textContent = count;
+    bottomCartCount.textContent =
+      count;
   }
 
 }
@@ -641,170 +2106,194 @@ loginBtn?.addEventListener(
 
     event.stopPropagation();
 
+
     const {
       data: { user }
     } = await supabase.auth.getUser();
 
+
     if (!user) {
 
-      accountMenu?.classList.remove('show');
+      accountMenu?.classList.remove(
+        'show'
+      );
 
       if (authMessage) {
         authMessage.textContent = '';
       }
 
-      authModal?.classList.add('show');
+      authModal?.classList.add(
+        'show'
+      );
 
       return;
+
     }
+
 
     await loadAccount();
 
-    accountMenu?.classList.toggle('show');
+    accountMenu?.classList.toggle(
+      'show'
+    );
 
   }
 );
 
 
 /* =========================================================
-   BECOME SELLER FROM ACCOUNT MENU
+   BECOME SELLER
 ========================================================= */
 
-if (becomeSellerBtn) {
+becomeSellerBtn?.addEventListener(
+  'click',
+  async () => {
 
-  becomeSellerBtn.addEventListener(
-    'click',
-    async () => {
-
-      const {
-        data: { user }
-      } = await supabase.auth.getUser();
-
-      if (!user) {
-
-        alert('Please log in first.');
-
-        return;
-      }
+    const {
+      data: { user }
+    } = await supabase.auth.getUser();
 
 
-      const {
-        data: profile,
-        error: profileError
-      } = await supabase
-        .from('profiles')
-        .select('role')
-        .eq('id', user.id)
-        .maybeSingle();
-
-      if (profileError) {
-
-        console.error(
-          'Role check error:',
-          profileError
-        );
-
-        alert(
-          'Unable to check your seller account.'
-        );
-
-        return;
-      }
-
-
-      if (profile?.role === 'seller') {
-
-        window.location.href =
-          'seller.html';
-
-        return;
-      }
-
-
-      if (profile?.role === 'admin') {
-
-        const openAdmin =
-          confirm(
-            'You are an administrator.\n\n' +
-            'Would you like to open the Admin Dashboard?'
-          );
-
-        if (openAdmin) {
-
-          window.location.href =
-            'admin.html';
-
-        }
-
-        return;
-      }
-
-
-      const confirmed =
-        confirm(
-          'Become a SYBER MART seller?\n\n' +
-          'You will be able to add and manage your own products.'
-        );
-
-      if (!confirmed) return;
-
-
-      becomeSellerBtn.disabled = true;
-
-      becomeSellerBtn.textContent =
-        'Setting up seller account...';
-
-
-      const { error } =
-        await supabase.rpc(
-          'become_seller'
-        );
-
-
-      if (error) {
-
-        console.error(
-          'Become seller error:',
-          error
-        );
-
-        alert(
-          `Unable to create seller account:\n${error.message}`
-        );
-
-        becomeSellerBtn.disabled = false;
-
-        becomeSellerBtn.textContent =
-          '🏪 Become a Seller';
-
-        return;
-      }
-
+    if (!user) {
 
       alert(
-        '🎉 Your seller account is ready!\n\n' +
-        'Welcome to SYBER MART Sellers.'
+        'Please log in first.'
       );
 
+      return;
+
+    }
+
+
+    const {
+      data: profile,
+      error: profileError
+    } = await supabase
+      .from('profiles')
+      .select('role')
+      .eq('id', user.id)
+      .maybeSingle();
+
+
+    if (profileError) {
+
+      console.error(
+        'Role check error:',
+        profileError
+      );
+
+      alert(
+        'Unable to check your seller account.'
+      );
+
+      return;
+
+    }
+
+
+    if (profile?.role === 'seller') {
 
       window.location.href =
         'seller.html';
 
-    }
-  );
+      return;
 
-}
+    }
+
+
+    if (profile?.role === 'admin') {
+
+      const openAdmin =
+        confirm(
+          'You are an administrator.\n\n' +
+          'Would you like to open the Admin Dashboard?'
+        );
+
+
+      if (openAdmin) {
+
+        window.location.href =
+          'admin.html';
+
+      }
+
+      return;
+
+    }
+
+
+    const confirmed =
+      confirm(
+        'Become a SYBER MART seller?\n\n' +
+        'You will be able to add and manage your own products.'
+      );
+
+
+    if (!confirmed) {
+      return;
+    }
+
+
+    becomeSellerBtn.disabled =
+      true;
+
+    becomeSellerBtn.textContent =
+      'Setting up seller account...';
+
+
+    const {
+      error
+    } = await supabase.rpc(
+      'become_seller'
+    );
+
+
+    if (error) {
+
+      console.error(
+        'Become seller error:',
+        error
+      );
+
+      alert(
+        `Unable to create seller account:\n${error.message}`
+      );
+
+      becomeSellerBtn.disabled =
+        false;
+
+      becomeSellerBtn.textContent =
+        '🏪 Become a Seller';
+
+      return;
+
+    }
+
+
+    alert(
+      '🎉 Your seller account is ready!\n\n' +
+      'Welcome to SYBER MART Sellers.'
+    );
+
+
+    window.location.href =
+      'seller.html';
+
+  }
+);
 
 
 /* =========================================================
-   CLOSE LOGIN MODAL
+   CLOSE AUTH
 ========================================================= */
 
 closeAuth?.addEventListener(
   'click',
   () => {
 
-    authModal?.classList.remove('show');
+    authModal?.classList.remove(
+      'show'
+    );
 
   }
 );
@@ -818,9 +2307,12 @@ switchAuth?.addEventListener(
   'click',
   () => {
 
-    sellerSignupMode = false;
+    sellerSignupMode =
+      false;
 
-    signupMode = !signupMode;
+    signupMode =
+      !signupMode;
+
 
     if (signupMode) {
 
@@ -830,7 +2322,8 @@ switchAuth?.addEventListener(
       nameField.style.display =
         'block';
 
-      fullName.required = true;
+      fullName.required =
+        true;
 
       authSubmit.textContent =
         'Create Account';
@@ -846,7 +2339,8 @@ switchAuth?.addEventListener(
       nameField.style.display =
         'none';
 
-      fullName.required = false;
+      fullName.required =
+        false;
 
       authSubmit.textContent =
         'Login';
@@ -856,55 +2350,57 @@ switchAuth?.addEventListener(
 
     }
 
-    authMessage.textContent = '';
+
+    authMessage.textContent =
+      '';
 
   }
 );
 
 
 /* =========================================================
-   SELLER SIGNUP BUTTON
+   SELLER SIGNUP
 ========================================================= */
 
-if (sellerSignupBtn) {
+sellerSignupBtn?.addEventListener(
+  'click',
+  () => {
 
-  sellerSignupBtn.addEventListener(
-    'click',
-    () => {
+    sellerSignupMode =
+      true;
 
-      sellerSignupMode = true;
-
-      signupMode = true;
-
-
-      authTitle.textContent =
-        'Become a Seller';
+    signupMode =
+      true;
 
 
-      authSubmit.textContent =
-        'Create Seller Account';
+    authTitle.textContent =
+      'Become a Seller';
+
+    authSubmit.textContent =
+      'Create Seller Account';
 
 
-      nameField.style.display =
-        'block';
+    nameField.style.display =
+      'block';
 
-      fullName.required = true;
-
-
-      switchAuth.textContent =
-        'Already have an account? Login';
+    fullName.required =
+      true;
 
 
-      authMessage.textContent =
-        'Create your seller account to start selling on SYBER MART.';
+    switchAuth.textContent =
+      'Already have an account? Login';
 
 
-      authModal.classList.add('show');
+    authMessage.textContent =
+      'Create your seller account to start selling on SYBER MART.';
 
-    }
-  );
 
-}
+    authModal?.classList.add(
+      'show'
+    );
+
+  }
+);
 
 
 /* =========================================================
@@ -917,8 +2413,10 @@ authForm?.addEventListener(
 
     event.preventDefault();
 
+
     authMessage.textContent =
       'Please wait...';
+
 
     const email =
       emailInput.value.trim();
@@ -927,14 +2425,15 @@ authForm?.addEventListener(
       passwordInput.value;
 
 
-    /* ===============================
+    /* =====================================================
        SIGNUP
-    =============================== */
+    ===================================================== */
 
     if (signupMode) {
 
       const name =
         fullName.value.trim();
+
 
       if (!name) {
 
@@ -942,6 +2441,7 @@ authForm?.addEventListener(
           'Please enter your full name.';
 
         return;
+
       }
 
 
@@ -969,12 +2469,13 @@ authForm?.addEventListener(
           error.message;
 
         return;
+
       }
 
 
-      /* ===============================
+      /* ===================================================
          SELLER SIGNUP
-      =============================== */
+      =================================================== */
 
       if (sellerSignupMode) {
 
@@ -983,10 +2484,14 @@ authForm?.addEventListener(
           authMessage.textContent =
             '✅ Seller account created. Please confirm your email, then log in to activate your seller account.';
 
-          sellerSignupMode = false;
-          signupMode = false;
+          sellerSignupMode =
+            false;
+
+          signupMode =
+            false;
 
           return;
+
         }
 
 
@@ -1008,11 +2513,15 @@ authForm?.addEventListener(
             `Account created, but seller setup failed: ${sellerError.message}`;
 
           return;
+
         }
 
 
-        sellerSignupMode = false;
-        signupMode = false;
+        sellerSignupMode =
+          false;
+
+        signupMode =
+          false;
 
 
         authMessage.textContent =
@@ -1031,23 +2540,27 @@ authForm?.addEventListener(
 
 
         return;
+
       }
 
 
-      /* ===============================
+      /* ===================================================
          NORMAL CUSTOMER SIGNUP
-      =============================== */
+      =================================================== */
 
       authMessage.textContent =
         'Account created successfully. Check your email if confirmation is required.';
 
-      signupMode = false;
+
+      signupMode =
+        false;
 
 
       nameField.style.display =
         'none';
 
-      fullName.required = false;
+      fullName.required =
+        false;
 
 
       authTitle.textContent =
@@ -1063,12 +2576,13 @@ authForm?.addEventListener(
 
 
       return;
+
     }
 
 
-    /* ===============================
+    /* =====================================================
        LOGIN
-    =============================== */
+    ===================================================== */
 
     const {
       error
@@ -1087,6 +2601,7 @@ authForm?.addEventListener(
         error.message;
 
       return;
+
     }
 
 
@@ -1097,9 +2612,11 @@ authForm?.addEventListener(
     setTimeout(
       async () => {
 
-        authModal.classList.remove('show');
+        authModal?.classList.remove(
+          'show'
+        );
 
-        authForm.reset();
+        authForm?.reset();
 
         await updateAuthButton();
 
@@ -1125,15 +2642,52 @@ async function updateAuthButton() {
     data: { user }
   } = await supabase.auth.getUser();
 
+
   if (user) {
 
-    loginBtn.textContent =
-      'Account';
+    /*
+      Keep the existing header structure intact.
+      Change only the visible text.
+    */
+
+    const textElement =
+      loginBtn?.querySelector(
+        'span:last-child'
+      );
+
+
+    if (textElement) {
+
+      textElement.textContent =
+        'Account';
+
+    } else if (loginBtn) {
+
+      loginBtn.textContent =
+        'Account';
+
+    }
 
   } else {
 
-    loginBtn.textContent =
-      'Login';
+    const textElement =
+      loginBtn?.querySelector(
+        'span:last-child'
+      );
+
+
+    if (textElement) {
+
+      textElement.textContent =
+        'Login';
+
+    } else if (loginBtn) {
+
+      loginBtn.textContent =
+        'Login';
+
+    }
+
 
     accountMenu?.classList.remove(
       'show'
@@ -1154,19 +2708,29 @@ async function loadAccount() {
     data: { user }
   } = await supabase.auth.getUser();
 
+
   if (!user) return;
 
 
-  accountEmail.textContent =
-    user.email || '';
+  if (accountEmail) {
+
+    accountEmail.textContent =
+      user.email || '';
+
+  }
 
 
   const metadataName =
     user.user_metadata?.full_name;
 
 
-  accountName.textContent =
-    metadataName || 'My Account';
+  if (accountName) {
+
+    accountName.textContent =
+      metadataName ||
+      'My Account';
+
+  }
 
 
   const {
@@ -1174,12 +2738,18 @@ async function loadAccount() {
     error
   } = await supabase
     .from('profiles')
-    .select('full_name, phone, role')
+    .select(
+      'full_name, phone, role'
+    )
     .eq('id', user.id)
     .maybeSingle();
 
 
-  if (!error && profile?.full_name) {
+  if (
+    !error &&
+    profile?.full_name &&
+    accountName
+  ) {
 
     accountName.textContent =
       profile.full_name;
@@ -1199,29 +2769,42 @@ logoutBtn?.addEventListener(
 
     event.stopPropagation();
 
-    const { error } =
-      await supabase.auth.signOut();
+
+    const {
+      error
+    } = await supabase.auth.signOut();
+
 
     if (error) {
 
       console.error(error);
 
-      alert('Unable to log out.');
+      alert(
+        'Unable to log out.'
+      );
 
       return;
+
     }
+
 
     accountMenu?.classList.remove(
       'show'
     );
 
+
     wishlistProductIds.clear();
 
-    displayProducts(allProducts);
+
+    displayProducts(
+      allProducts
+    );
+
 
     await updateAuthButton();
 
     await updateCartCount();
+
 
     alert(
       'You have been logged out.'
@@ -1241,7 +2824,9 @@ document.addEventListener(
 
     if (
       accountMenu &&
-      !accountMenu.contains(event.target) &&
+      !accountMenu.contains(
+        event.target
+      ) &&
       event.target !== loginBtn
     ) {
 
@@ -1274,13 +2859,17 @@ profileBtn?.addEventListener(
     } = await supabase.auth.getUser();
 
 
-    if (userError || !user) {
+    if (
+      userError ||
+      !user
+    ) {
 
       alert(
         'Please log in first.'
       );
 
       return;
+
     }
 
 
@@ -1293,7 +2882,9 @@ profileBtn?.addEventListener(
       error
     } = await supabase
       .from('profiles')
-      .select('full_name, phone')
+      .select(
+        'full_name, phone'
+      )
       .eq('id', user.id)
       .maybeSingle();
 
@@ -1315,14 +2906,15 @@ profileBtn?.addEventListener(
 
 
     profilePhone.value =
-      profile?.phone || '';
+      profile?.phone ||
+      '';
 
 
     profileMessage.textContent =
       '';
 
 
-    profileModal.classList.add(
+    profileModal?.classList.add(
       'show'
     );
 
@@ -1367,6 +2959,7 @@ saveProfileBtn?.addEventListener(
         'Please enter your full name.';
 
       return;
+
     }
 
 
@@ -1381,14 +2974,15 @@ saveProfileBtn?.addEventListener(
       '';
 
 
-    const { error } =
-      await supabase.rpc(
-        'update_my_profile',
-        {
-          p_full_name: name,
-          p_phone: phone
-        }
-      );
+    const {
+      error
+    } = await supabase.rpc(
+      'update_my_profile',
+      {
+        p_full_name: name,
+        p_phone: phone
+      }
+    );
 
 
     if (error) {
@@ -1401,6 +2995,7 @@ saveProfileBtn?.addEventListener(
       profileMessage.textContent =
         'Could not save your profile.';
 
+
       saveProfileBtn.disabled =
         false;
 
@@ -1408,6 +3003,7 @@ saveProfileBtn?.addEventListener(
         'Save Changes';
 
       return;
+
     }
 
 
@@ -1415,8 +3011,12 @@ saveProfileBtn?.addEventListener(
       'Profile saved successfully!';
 
 
-    accountName.textContent =
-      name;
+    if (accountName) {
+
+      accountName.textContent =
+        name;
+
+    }
 
 
     saveProfileBtn.disabled =
@@ -1441,9 +3041,11 @@ ordersBtn?.addEventListener(
       'show'
     );
 
+
     ordersModal?.classList.add(
       'show'
     );
+
 
     await loadOrders();
 
@@ -1471,6 +3073,7 @@ async function loadOrders() {
 
   if (!ordersList) return;
 
+
   ordersList.innerHTML =
     '<p>Loading orders...</p>';
 
@@ -1486,6 +3089,7 @@ async function loadOrders() {
       '<p>Please log in to view your orders.</p>';
 
     return;
+
   }
 
 
@@ -1512,6 +3116,7 @@ async function loadOrders() {
       '<p>Unable to load your orders.</p>';
 
     return;
+
   }
 
 
@@ -1521,6 +3126,7 @@ async function loadOrders() {
   ) {
 
     ordersList.innerHTML = `
+
       <div class="empty-orders">
 
         <p>
@@ -1532,9 +3138,11 @@ async function loadOrders() {
         </p>
 
       </div>
+
     `;
 
     return;
+
   }
 
 
@@ -1542,68 +3150,75 @@ async function loadOrders() {
     '';
 
 
-  orders.forEach(order => {
+  orders.forEach(
+    order => {
 
-    const date =
-      new Date(
-        order.created_at
-      ).toLocaleDateString();
+      const date =
+        new Date(
+          order.created_at
+        ).toLocaleDateString();
 
 
-    ordersList.innerHTML += `
-      <div class="order-card">
+      ordersList.innerHTML += `
 
-        <div class="order-header">
+        <div class="order-card">
 
-          <strong>
-            Order #${order.order_number || order.id}
-          </strong>
+          <div class="order-header">
 
-          <span>
-            ${date}
-          </span>
+            <strong>
+              Order #${escapeHtml(
+                order.order_number ||
+                order.id
+              )}
+            </strong>
+
+            <span>
+              ${escapeHtml(date)}
+            </span>
+
+          </div>
+
+
+          <div class="order-details">
+
+            <p>
+              <strong>Total:</strong>
+              GH₵ ${numberValue(
+                order.total_amount
+              ).toFixed(2)}
+            </p>
+
+
+            <p>
+              <strong>Payment:</strong>
+              ${escapeHtml(
+                order.payment_status
+              )}
+            </p>
+
+
+            <p>
+              <strong>Status:</strong>
+              ${escapeHtml(
+                order.status
+              )}
+            </p>
+
+          </div>
 
         </div>
 
+      `;
 
-        <div class="order-details">
-
-          <p>
-            <strong>Total:</strong>
-            GH₵ ${Number(
-              order.total_amount
-            ).toFixed(2)}
-          </p>
-
-
-          <p>
-            <strong>Payment:</strong>
-            ${order.payment_status}
-          </p>
-
-
-          <p>
-            <strong>Status:</strong>
-            ${order.status}
-          </p>
-
-        </div>
-
-      </div>
-    `;
-
-  });
+    }
+  );
 
 }
 
 
 /* =========================================================
-   WISHLIST
+   LOAD WISHLIST IDS
 ========================================================= */
-
-/*
-  Load only the product IDs currently in the user's wishlist.
-*/
 
 async function loadWishlistIds() {
 
@@ -1611,15 +3226,24 @@ async function loadWishlistIds() {
     data: { user }
   } = await supabase.auth.getUser();
 
+
   wishlistProductIds.clear();
+
 
   if (!user) {
 
-    displayProducts(allProducts);
+    if (allProducts.length) {
+
+      displayProducts(
+        allProducts
+      );
+
+    }
 
     return;
 
   }
+
 
   const {
     data,
@@ -1629,6 +3253,7 @@ async function loadWishlistIds() {
     .select('product_id')
     .eq('user_id', user.id);
 
+
   if (error) {
 
     console.error(
@@ -1636,20 +3261,39 @@ async function loadWishlistIds() {
       error
     );
 
-    displayProducts(allProducts);
+    if (allProducts.length) {
+
+      displayProducts(
+        allProducts
+      );
+
+    }
 
     return;
+
   }
 
-  (data || []).forEach(item => {
 
-    wishlistProductIds.add(
-      String(item.product_id)
+  (data || []).forEach(
+    item => {
+
+      wishlistProductIds.add(
+        String(
+          item.product_id
+        )
+      );
+
+    }
+  );
+
+
+  if (allProducts.length) {
+
+    displayProducts(
+      allProducts
     );
 
-  });
-
-  displayProducts(allProducts);
+  }
 
 }
 
@@ -1658,30 +3302,46 @@ async function loadWishlistIds() {
    TOGGLE WISHLIST
 ========================================================= */
 
-async function toggleWishlist(productId) {
+async function toggleWishlist(
+  productId
+) {
 
   const {
     data: { user }
   } = await supabase.auth.getUser();
 
+
   if (!user) {
 
-    authMessage.textContent =
-      'Please log in to use your wishlist.';
+    if (authMessage) {
 
-    authModal.classList.add('show');
+      authMessage.textContent =
+        'Please log in to use your wishlist.';
 
-    return;
+    }
+
+    authModal?.classList.add(
+      'show'
+    );
+
+    return false;
+
   }
+
 
   const productKey =
     String(productId);
 
+
   const alreadyWishlisted =
-    wishlistProductIds.has(productKey);
+    wishlistProductIds.has(
+      productKey
+    );
 
 
-  /* REMOVE FROM WISHLIST */
+  /* =====================================================
+     REMOVE
+  ===================================================== */
 
   if (alreadyWishlisted) {
 
@@ -1693,6 +3353,7 @@ async function toggleWishlist(productId) {
       .eq('user_id', user.id)
       .eq('product_id', productId);
 
+
     if (error) {
 
       console.error(
@@ -1701,20 +3362,28 @@ async function toggleWishlist(productId) {
       );
 
       alert(
-        'Could not remove this product from your wishlist.'
+        `Could not remove this product from your wishlist.\n\n${error.message}`
       );
 
-      return;
+      return false;
+
     }
+
 
     wishlistProductIds.delete(
       productKey
     );
 
+
+    updateProductDetailsWishlistButton();
+
+
   }
 
 
-  /* ADD TO WISHLIST */
+  /* =====================================================
+     ADD
+  ===================================================== */
 
   else {
 
@@ -1727,6 +3396,7 @@ async function toggleWishlist(productId) {
         product_id: productId
       });
 
+
     if (error) {
 
       console.error(
@@ -1735,26 +3405,34 @@ async function toggleWishlist(productId) {
       );
 
       alert(
-        'Could not add this product to your wishlist.'
+        `Could not add this product to your wishlist.\n\n${error.message}`
       );
 
-      return;
+      return false;
+
     }
+
 
     wishlistProductIds.add(
       productKey
     );
 
+
+    updateProductDetailsWishlistButton();
+
   }
 
 
-  /*
-    Refresh product cards so the heart
-    changes immediately.
-  */
+  /* =====================================================
+     REFRESH PRODUCT CARDS
+  ===================================================== */
 
   const searchTerm =
-    searchInput?.value.trim().toLowerCase() || '';
+    searchInput?.value
+      .trim()
+      .toLowerCase() ||
+    '';
+
 
   if (searchTerm) {
 
@@ -1762,9 +3440,14 @@ async function toggleWishlist(productId) {
 
   } else {
 
-    displayProducts(allProducts);
+    displayProducts(
+      allProducts
+    );
 
   }
+
+
+  return true;
 
 }
 
@@ -1775,13 +3458,24 @@ async function toggleWishlist(productId) {
 
 function createWishlistModal() {
 
-  if (document.getElementById('wishlistModal')) {
-    return document.getElementById('wishlistModal');
+  const existing =
+    document.getElementById(
+      'wishlistModal'
+    );
+
+
+  if (existing) {
+
+    return existing;
+
   }
 
 
   const modal =
-    document.createElement('div');
+    document.createElement(
+      'div'
+    );
+
 
   modal.id =
     'wishlistModal';
@@ -1814,6 +3508,7 @@ function createWishlistModal() {
           ❤️ My Wishlist
         </h2>
 
+
         <button
           id="closeWishlist"
           type="button"
@@ -1823,11 +3518,13 @@ function createWishlistModal() {
             font-size:30px;
             cursor:pointer;
             line-height:1;
-          ">
+          "
+        >
           ×
         </button>
 
       </div>
+
 
       <div id="wishlistItems">
         <p>Loading wishlist...</p>
@@ -1838,18 +3535,24 @@ function createWishlistModal() {
   `;
 
 
-  document.body.appendChild(modal);
+  document.body.appendChild(
+    modal
+  );
 
 
   const closeWishlist =
-    document.getElementById('closeWishlist');
+    document.getElementById(
+      'closeWishlist'
+    );
 
 
   closeWishlist?.addEventListener(
     'click',
     () => {
 
-      modal.classList.remove('show');
+      modal.classList.remove(
+        'show'
+      );
 
     }
   );
@@ -1859,9 +3562,14 @@ function createWishlistModal() {
     'click',
     event => {
 
-      if (event.target === modal) {
+      if (
+        event.target ===
+        modal
+      ) {
 
-        modal.classList.remove('show');
+        modal.classList.remove(
+          'show'
+        );
 
       }
 
@@ -1892,14 +3600,19 @@ async function openWishlist() {
 
   if (!user) {
 
-    authMessage.textContent =
-      'Please log in to view your wishlist.';
+    if (authMessage) {
 
-    authModal.classList.add(
+      authMessage.textContent =
+        'Please log in to view your wishlist.';
+
+    }
+
+    authModal?.classList.add(
       'show'
     );
 
     return;
+
   }
 
 
@@ -1924,7 +3637,10 @@ async function openWishlist() {
 async function loadWishlistItems() {
 
   const wishlistItems =
-    document.getElementById('wishlistItems');
+    document.getElementById(
+      'wishlistItems'
+    );
+
 
   if (!wishlistItems) return;
 
@@ -1944,6 +3660,7 @@ async function loadWishlistItems() {
       '<p>Please log in to view your wishlist.</p>';
 
     return;
+
   }
 
 
@@ -1973,13 +3690,17 @@ async function loadWishlistItems() {
     );
 
     wishlistItems.innerHTML =
-      '<p>Unable to load your wishlist.</p>';
+      `<p>Unable to load your wishlist.</p>`;
 
     return;
+
   }
 
 
-  if (!data || data.length === 0) {
+  if (
+    !data ||
+    data.length === 0
+  ) {
 
     wishlistItems.innerHTML = `
 
@@ -2006,6 +3727,7 @@ async function loadWishlistItems() {
     `;
 
     return;
+
   }
 
 
@@ -2013,172 +3735,237 @@ async function loadWishlistItems() {
     '';
 
 
-  data.forEach(item => {
+  data.forEach(
+    item => {
 
-    const product =
-      item.products;
-
-
-    if (!product) return;
+      const product =
+        item.products;
 
 
-    const image =
-      product.image_url ||
-      fallbackImage;
+      if (!product) return;
 
 
-    const stock =
-      Number(product.stock || 0);
+      const image =
+        product.image_url ||
+        fallbackImage;
 
 
-    wishlistItems.innerHTML += `
+      const stock =
+        numberValue(
+          product.stock
+        );
 
-      <div
-        class="wishlist-item"
-        style="
-          display:flex;
-          align-items:center;
-          gap:14px;
-          padding:14px 0;
-          border-bottom:1px solid #eee;
-        ">
 
-        <img
-          src="${image}"
-          alt="${product.name}"
-          style="
-            width:80px;
-            height:80px;
-            object-fit:cover;
-            border-radius:10px;
-            background:#f5f5f5;
-          "
-          onerror="this.onerror=null; this.src='${fallbackImage}';"
-        >
+      wishlistItems.innerHTML += `
 
         <div
-          style="
-            flex:1;
-            min-width:0;
-          ">
-
-          <h4
-            style="
-              margin:0 0 6px;
-              font-size:16px;
-            ">
-            ${product.name}
-          </h4>
-
-          <p
-            style="
-              margin:0 0 8px;
-              font-weight:700;
-              color:#ff7900;
-            ">
-            GH₵ ${Number(product.price).toFixed(2)}
-          </p>
-
-          <p
-            style="
-              margin:0;
-              font-size:12px;
-              color:${stock > 0 ? '#16803c' : '#d00'};
-            ">
-            ${stock > 0 ? `${stock} available` : 'Out of stock'}
-          </p>
-
-        </div>
-
-        <div
+          class="wishlist-item"
           style="
             display:flex;
-            flex-direction:column;
-            gap:6px;
+            align-items:center;
+            gap:14px;
+            padding:14px 0;
+            border-bottom:1px solid #eee;
           ">
 
-          <button
-            class="wishlist-cart-btn"
-            data-product-id="${product.id}"
-            ${stock <= 0 ? 'disabled' : ''}
+          <img
+            src="${escapeHtml(image)}"
+            alt="${escapeHtml(product.name)}"
             style="
-              border:none;
-              border-radius:7px;
-              background:${stock > 0 ? '#ff7900' : '#ccc'};
-              color:white;
-              padding:8px 10px;
-              cursor:${stock > 0 ? 'pointer' : 'not-allowed'};
-              font-size:12px;
-            ">
-            ${stock > 0 ? 'Add to Cart' : 'Out of Stock'}
-          </button>
+              width:80px;
+              height:80px;
+              object-fit:cover;
+              border-radius:10px;
+              background:#f5f5f5;
+            "
+            onerror="
+              this.onerror=null;
+              this.src='${fallbackImage}';
+            "
+          >
 
-          <button
-            class="wishlist-remove-btn"
-            data-product-id="${product.id}"
+
+          <div
             style="
-              border:1px solid #ddd;
-              border-radius:7px;
-              background:white;
-              color:#d00;
-              padding:7px 10px;
-              cursor:pointer;
-              font-size:12px;
+              flex:1;
+              min-width:0;
             ">
-            Remove
-          </button>
+
+            <h4
+              style="
+                margin:0 0 6px;
+                font-size:16px;
+              "
+            >
+              ${escapeHtml(product.name)}
+            </h4>
+
+
+            <p
+              style="
+                margin:0 0 8px;
+                font-weight:700;
+                color:#ff7900;
+              "
+            >
+              GH₵ ${numberValue(
+                product.price
+              ).toFixed(2)}
+            </p>
+
+
+            <p
+              style="
+                margin:0;
+                font-size:12px;
+                color:${
+                  stock > 0
+                    ? '#16803c'
+                    : '#d00'
+                };
+              "
+            >
+              ${
+                stock > 0
+                  ? `${stock} available`
+                  : 'Out of stock'
+              }
+            </p>
+
+          </div>
+
+
+          <div
+            style="
+              display:flex;
+              flex-direction:column;
+              gap:6px;
+            ">
+
+            <button
+              class="wishlist-cart-btn"
+              data-product-id="${escapeHtml(product.id)}"
+              ${
+                stock <= 0
+                  ? 'disabled'
+                  : ''
+              }
+              style="
+                border:none;
+                border-radius:7px;
+                background:${
+                  stock > 0
+                    ? '#ff7900'
+                    : '#ccc'
+                };
+                color:white;
+                padding:8px 10px;
+                cursor:${
+                  stock > 0
+                    ? 'pointer'
+                    : 'not-allowed'
+                };
+                font-size:12px;
+              "
+            >
+              ${
+                stock > 0
+                  ? 'Add to Cart'
+                  : 'Out of Stock'
+              }
+            </button>
+
+
+            <button
+              class="wishlist-remove-btn"
+              data-product-id="${escapeHtml(product.id)}"
+              style="
+                border:1px solid #ddd;
+                border-radius:7px;
+                background:white;
+                color:#d00;
+                padding:7px 10px;
+                cursor:pointer;
+                font-size:12px;
+              "
+            >
+              Remove
+            </button>
+
+          </div>
 
         </div>
 
-      </div>
+      `;
 
-    `;
-
-  });
-
-
-  /* ADD TO CART FROM WISHLIST */
-
-  document
-    .querySelectorAll('.wishlist-cart-btn')
-    .forEach(button => {
-
-      button.addEventListener(
-        'click',
-        async () => {
-
-          if (button.disabled) return;
-
-          await addToCart(
-            button.dataset.productId
-          );
-
-        }
-      );
-
-    });
+    }
+  );
 
 
-  /* REMOVE FROM WISHLIST */
+  /* =====================================================
+     ADD TO CART
+  ===================================================== */
 
   document
-    .querySelectorAll('.wishlist-remove-btn')
-    .forEach(button => {
+    .querySelectorAll(
+      '.wishlist-cart-btn'
+    )
+    .forEach(
+      button => {
 
-      button.addEventListener(
-        'click',
-        async () => {
+        button.addEventListener(
+          'click',
+          async () => {
 
-          await toggleWishlist(
-            button.dataset.productId
-          );
+            if (button.disabled) {
+              return;
+            }
 
-          await loadWishlistItems();
 
-        }
-      );
+            await addToCart(
+              button.dataset.productId,
+              1
+            );
 
-    });
+          }
+        );
+
+      }
+    );
+
+
+  /* =====================================================
+     REMOVE
+  ===================================================== */
+
+  document
+    .querySelectorAll(
+      '.wishlist-remove-btn'
+    )
+    .forEach(
+      button => {
+
+        button.addEventListener(
+          'click',
+          async () => {
+
+            const success =
+              await toggleWishlist(
+                button.dataset.productId
+              );
+
+
+            if (success) {
+
+              await loadWishlistItems();
+
+            }
+
+          }
+        );
+
+      }
+    );
 
 }
 
@@ -2188,6 +3975,26 @@ async function loadWishlistItems() {
 ========================================================= */
 
 wishlistBtn?.addEventListener(
+  'click',
+  async () => {
+
+    await openWishlist();
+
+  }
+);
+
+
+/* =========================================================
+   HEADER WISHLIST BUTTON
+========================================================= */
+
+const headerWishlistBtn =
+  document.getElementById(
+    'headerWishlistBtn'
+  );
+
+
+headerWishlistBtn?.addEventListener(
   'click',
   async () => {
 
@@ -2212,18 +4019,23 @@ cartBtn?.addEventListener(
 
     if (!user) {
 
-      authMessage.textContent =
-        'Please log in to view your cart.';
+      if (authMessage) {
 
-      authModal.classList.add(
+        authMessage.textContent =
+          'Please log in to view your cart.';
+
+      }
+
+      authModal?.classList.add(
         'show'
       );
 
       return;
+
     }
 
 
-    cartModal.classList.add(
+    cartModal?.classList.add(
       'show'
     );
 
@@ -2258,6 +4070,7 @@ async function loadCart() {
 
   if (!cartItemsContainer) return;
 
+
   cartItemsContainer.innerHTML =
     '<p>Loading cart...</p>';
 
@@ -2273,6 +4086,7 @@ async function loadCart() {
       '<p>Please log in.</p>';
 
     return;
+
   }
 
 
@@ -2309,6 +4123,7 @@ async function loadCart() {
       '<p>Unable to load your cart.</p>';
 
     return;
+
   }
 
 
@@ -2320,10 +4135,16 @@ async function loadCart() {
     cartItemsContainer.innerHTML =
       '<p>Your cart is empty.</p>';
 
-    cartTotal.textContent =
-      'GH₵ 0.00';
+
+    if (cartTotal) {
+
+      cartTotal.textContent =
+        'GH₵ 0.00';
+
+    }
 
     return;
+
   }
 
 
@@ -2334,91 +4155,116 @@ async function loadCart() {
     '';
 
 
-  data.forEach(item => {
+  data.forEach(
+    item => {
 
-    const product =
-      item.products;
-
-
-    if (!product) return;
+      const product =
+        item.products;
 
 
-    const itemTotal =
-      Number(product.price) *
-      item.quantity;
+      if (!product) return;
 
 
-    total += itemTotal;
+      const itemTotal =
+        numberValue(
+          product.price
+        ) *
+        Number(
+          item.quantity
+        );
 
 
-    const image =
-      product.image_url ||
-      'https://via.placeholder.com/100?text=Product';
+      total +=
+        itemTotal;
 
 
-    cartItemsContainer.innerHTML += `
+      const image =
+        product.image_url ||
+        fallbackImage;
 
-      <div class="cart-item">
 
-        <img
-          src="${image}"
-          alt="${product.name}"
-        >
+      cartItemsContainer.innerHTML += `
 
-        <div class="cart-item-info">
+        <div class="cart-item">
 
-          <h4>
-            ${product.name}
-          </h4>
+          <img
+            src="${escapeHtml(image)}"
+            alt="${escapeHtml(product.name)}"
+            onerror="
+              this.onerror=null;
+              this.src='${fallbackImage}';
+            "
+          >
 
-          <div class="cart-item-price">
 
-            GH₵ ${Number(
-              product.price
-            ).toFixed(2)}
+          <div class="cart-item-info">
 
-          </div>
+            <h4>
+              ${escapeHtml(product.name)}
+            </h4>
 
-          <div class="cart-controls">
 
-            <button
-              class="quantity-minus"
-              data-id="${item.id}"
-              data-quantity="${item.quantity}">
-              −
-            </button>
+            <div class="cart-item-price">
+              GH₵ ${numberValue(
+                product.price
+              ).toFixed(2)}
+            </div>
 
-            <span>
-              ${item.quantity}
-            </span>
 
-            <button
-              class="quantity-plus"
-              data-id="${item.id}"
-              data-quantity="${item.quantity}"
-              data-stock="${product.stock}">
-              +
-            </button>
+            <div class="cart-controls">
 
-            <button
-              class="remove-cart"
-              data-id="${item.id}">
-              Remove
-            </button>
+              <button
+                class="quantity-minus"
+                data-id="${escapeHtml(item.id)}"
+                data-quantity="${item.quantity}"
+                type="button"
+              >
+                −
+              </button>
+
+
+              <span>
+                ${item.quantity}
+              </span>
+
+
+              <button
+                class="quantity-plus"
+                data-id="${escapeHtml(item.id)}"
+                data-quantity="${item.quantity}"
+                data-stock="${product.stock}"
+                type="button"
+              >
+                +
+              </button>
+
+
+              <button
+                class="remove-cart"
+                data-id="${escapeHtml(item.id)}"
+                type="button"
+              >
+                Remove
+              </button>
+
+            </div>
 
           </div>
 
         </div>
 
-      </div>
+      `;
 
-    `;
+    }
+  );
 
-  });
 
+  if (cartTotal) {
 
-  cartTotal.textContent =
-    `GH₵ ${total.toFixed(2)}`;
+    cartTotal.textContent =
+      `GH₵ ${total.toFixed(2)}`;
+
+  }
 
 
   addCartControls();
@@ -2433,110 +4279,126 @@ async function loadCart() {
 function addCartControls() {
 
   document
-    .querySelectorAll('.quantity-minus')
-    .forEach(button => {
+    .querySelectorAll(
+      '.quantity-minus'
+    )
+    .forEach(
+      button => {
 
-      button.addEventListener(
-        'click',
-        async () => {
+        button.addEventListener(
+          'click',
+          async () => {
 
-          const id =
-            button.dataset.id;
+            const id =
+              button.dataset.id;
 
-          const quantity =
-            Number(
-              button.dataset.quantity
-            );
+            const quantity =
+              Number(
+                button.dataset.quantity
+              );
 
 
-          if (quantity <= 1) {
+            if (quantity <= 1) {
 
-            await removeCartItem(id);
+              await removeCartItem(
+                id
+              );
 
-          } else {
+            } else {
+
+              await updateCartItem(
+                id,
+                quantity - 1
+              );
+
+            }
+
+          }
+        );
+
+      }
+    );
+
+
+  document
+    .querySelectorAll(
+      '.quantity-plus'
+    )
+    .forEach(
+      button => {
+
+        button.addEventListener(
+          'click',
+          async () => {
+
+            const id =
+              button.dataset.id;
+
+            const quantity =
+              Number(
+                button.dataset.quantity
+              );
+
+            const stock =
+              Number(
+                button.dataset.stock
+              );
+
+
+            if (stock <= 0) {
+
+              alert(
+                'This product is out of stock.'
+              );
+
+              return;
+
+            }
+
+
+            if (quantity >= stock) {
+
+              alert(
+                'You have reached the available stock.'
+              );
+
+              return;
+
+            }
+
 
             await updateCartItem(
               id,
-              quantity - 1
+              quantity + 1
             );
 
           }
+        );
 
-        }
-      );
-
-    });
+      }
+    );
 
 
   document
-    .querySelectorAll('.quantity-plus')
-    .forEach(button => {
+    .querySelectorAll(
+      '.remove-cart'
+    )
+    .forEach(
+      button => {
 
-      button.addEventListener(
-        'click',
-        async () => {
+        button.addEventListener(
+          'click',
+          async () => {
 
-          const id =
-            button.dataset.id;
-
-          const quantity =
-            Number(
-              button.dataset.quantity
+            await removeCartItem(
+              button.dataset.id
             );
 
-          const stock =
-            Number(
-              button.dataset.stock
-            );
-
-
-          if (stock <= 0) {
-
-            alert(
-              'This product is out of stock.'
-            );
-
-            return;
           }
+        );
 
-
-          if (quantity >= stock) {
-
-            alert(
-              'You have reached the available stock.'
-            );
-
-            return;
-          }
-
-
-          await updateCartItem(
-            id,
-            quantity + 1
-          );
-
-        }
-      );
-
-    });
-
-
-  document
-    .querySelectorAll('.remove-cart')
-    .forEach(button => {
-
-      button.addEventListener(
-        'click',
-        async () => {
-
-          await removeCartItem(
-            button.dataset.id
-          );
-
-        }
-      );
-
-    });
+      }
+    );
 
 }
 
@@ -2550,24 +4412,29 @@ async function updateCartItem(
   quantity
 ) {
 
-  const { error } =
-    await supabase
-      .from('cart_items')
-      .update({
-        quantity
-      })
-      .eq('id', id);
+  const {
+    error
+  } = await supabase
+    .from('cart_items')
+    .update({
+      quantity
+    })
+    .eq('id', id);
 
 
   if (error) {
 
-    console.error(error);
+    console.error(
+      'Cart update error:',
+      error
+    );
 
     alert(
-      'Could not update cart.'
+      `Could not update cart.\n\n${error.message}`
     );
 
     return;
+
   }
 
 
@@ -2582,24 +4449,31 @@ async function updateCartItem(
    REMOVE CART ITEM
 ========================================================= */
 
-async function removeCartItem(id) {
+async function removeCartItem(
+  id
+) {
 
-  const { error } =
-    await supabase
-      .from('cart_items')
-      .delete()
-      .eq('id', id);
+  const {
+    error
+  } = await supabase
+    .from('cart_items')
+    .delete()
+    .eq('id', id);
 
 
   if (error) {
 
-    console.error(error);
+    console.error(
+      'Cart delete error:',
+      error
+    );
 
     alert(
-      'Could not remove item.'
+      `Could not remove item.\n\n${error.message}`
     );
 
     return;
+
   }
 
 
@@ -2633,10 +4507,15 @@ checkoutBtn?.addEventListener(
         'show'
       );
 
-      authMessage.textContent =
-        'Please log in before checking out.';
+      if (authMessage) {
+
+        authMessage.textContent =
+          'Please log in before checking out.';
+
+      }
 
       return;
+
     }
 
 
@@ -2652,8 +4531,12 @@ checkoutBtn?.addEventListener(
 
 async function prepareCheckout() {
 
-  checkoutMessage.textContent =
-    '';
+  if (checkoutMessage) {
+
+    checkoutMessage.textContent =
+      '';
+
+  }
 
 
   const {
@@ -2668,17 +4551,21 @@ async function prepareCheckout() {
     data: profile
   } = await supabase
     .from('profiles')
-    .select('full_name, phone')
+    .select(
+      'full_name, phone'
+    )
     .eq('id', user.id)
     .maybeSingle();
 
 
   deliveryName.value =
-    profile?.full_name || '';
+    profile?.full_name ||
+    '';
 
 
   deliveryPhone.value =
-    profile?.phone || '';
+    profile?.phone ||
+    '';
 
 
   const {
@@ -2699,13 +4586,17 @@ async function prepareCheckout() {
 
   if (error) {
 
-    console.error(error);
+    console.error(
+      'Checkout cart error:',
+      error
+    );
 
     alert(
       'Unable to prepare checkout.'
     );
 
     return;
+
   }
 
 
@@ -2719,38 +4610,41 @@ async function prepareCheckout() {
     );
 
     return;
+
   }
 
 
   let total = 0;
 
 
-  cartItems.forEach(item => {
+  cartItems.forEach(
+    item => {
 
-    if (item.products) {
+      if (item.products) {
 
-      total +=
-        Number(
-          item.products.price
-        ) *
-        Number(
-          item.quantity
-        );
+        total +=
+          numberValue(
+            item.products.price
+          ) *
+          Number(
+            item.quantity
+          );
+
+      }
 
     }
-
-  });
+  );
 
 
   checkoutTotal.textContent =
     `GH₵ ${total.toFixed(2)}`;
 
 
-  cartModal.classList.remove(
+  cartModal?.classList.remove(
     'show'
   );
 
-  checkoutModal.classList.add(
+  checkoutModal?.classList.add(
     'show'
   );
 
@@ -2805,6 +4699,7 @@ placeOrderBtn?.addEventListener(
         'Please complete all delivery details.';
 
       return;
+
     }
 
 
@@ -2813,6 +4708,7 @@ placeOrderBtn?.addEventListener(
 
     placeOrderBtn.textContent =
       'Preparing Payment...';
+
 
     checkoutMessage.textContent =
       '';
@@ -2828,6 +4724,7 @@ placeOrderBtn?.addEventListener(
       checkoutMessage.textContent =
         'Please log in again.';
 
+
       placeOrderBtn.disabled =
         false;
 
@@ -2835,10 +4732,13 @@ placeOrderBtn?.addEventListener(
         'Pay with Paystack';
 
       return;
+
     }
 
 
-    /* GET CART */
+    /* =====================================================
+       GET CART
+    ===================================================== */
 
     const {
       data: cartItems,
@@ -2867,6 +4767,7 @@ placeOrderBtn?.addEventListener(
       checkoutMessage.textContent =
         'Could not load your cart.';
 
+
       placeOrderBtn.disabled =
         false;
 
@@ -2874,6 +4775,7 @@ placeOrderBtn?.addEventListener(
         'Pay with Paystack';
 
       return;
+
     }
 
 
@@ -2885,6 +4787,7 @@ placeOrderBtn?.addEventListener(
       checkoutMessage.textContent =
         'Your cart is empty.';
 
+
       placeOrderBtn.disabled =
         false;
 
@@ -2892,10 +4795,13 @@ placeOrderBtn?.addEventListener(
         'Pay with Paystack';
 
       return;
+
     }
 
 
-    /* CALCULATE TOTAL */
+    /* =====================================================
+       CALCULATE TOTAL
+    ===================================================== */
 
     let total = 0;
 
@@ -2904,11 +4810,13 @@ placeOrderBtn?.addEventListener(
       const item of cartItems
     ) {
 
-      if (!item.products) continue;
+      if (!item.products) {
+        continue;
+      }
 
 
       const stock =
-        Number(
+        numberValue(
           item.products.stock
         );
 
@@ -2923,6 +4831,7 @@ placeOrderBtn?.addEventListener(
         checkoutMessage.textContent =
           `${item.products.name} does not have enough stock.`;
 
+
         placeOrderBtn.disabled =
           false;
 
@@ -2930,11 +4839,12 @@ placeOrderBtn?.addEventListener(
           'Pay with Paystack';
 
         return;
+
       }
 
 
       total +=
-        Number(
+        numberValue(
           item.products.price
         ) *
         quantity;
@@ -2942,13 +4852,17 @@ placeOrderBtn?.addEventListener(
     }
 
 
-    /* UNIQUE PAYMENT REFERENCE */
+    /* =====================================================
+       UNIQUE PAYMENT REFERENCE
+    ===================================================== */
 
     const reference =
       `SYBER-${Date.now()}-${user.id.slice(0, 8)}`;
 
 
-    /* CREATE PENDING ORDER */
+    /* =====================================================
+       CREATE PENDING ORDER
+    ===================================================== */
 
     const {
       data: order,
@@ -2957,25 +4871,35 @@ placeOrderBtn?.addEventListener(
       .from('orders')
       .insert({
 
-        user_id: user.id,
+        user_id:
+          user.id,
 
-        total_amount: total,
+        total_amount:
+          total,
 
-        status: 'pending',
+        status:
+          'pending',
 
-        payment_status: 'pending',
+        payment_status:
+          'pending',
 
-        payment_method: 'paystack',
+        payment_method:
+          'paystack',
 
-        payment_reference: reference,
+        payment_reference:
+          reference,
 
-        delivery_name: name,
+        delivery_name:
+          name,
 
-        delivery_phone: phone,
+        delivery_phone:
+          phone,
 
-        delivery_address: address,
+        delivery_address:
+          address,
 
-        delivery_city: city
+        delivery_city:
+          city
 
       })
       .select()
@@ -2990,7 +4914,8 @@ placeOrderBtn?.addEventListener(
       );
 
       checkoutMessage.textContent =
-        'Could not create your order.';
+        `Could not create your order.\n${orderError.message}`;
+
 
       placeOrderBtn.disabled =
         false;
@@ -2999,40 +4924,49 @@ placeOrderBtn?.addEventListener(
         'Pay with Paystack';
 
       return;
+
     }
 
 
-    /* CREATE ORDER ITEMS */
+    /* =====================================================
+       CREATE ORDER ITEMS
+    ===================================================== */
 
     const orderItems =
       cartItems
         .filter(
-          item => item.products
+          item =>
+            item.products
         )
-        .map(item => ({
+        .map(
+          item => ({
 
-          order_id: order.id,
+            order_id:
+              order.id,
 
-          product_id:
-            item.product_id,
+            product_id:
+              item.product_id,
 
-          product_name:
-            item.products.name,
+            product_name:
+              item.products.name,
 
-          quantity:
-            item.quantity,
+            quantity:
+              item.quantity,
 
-          unit_price:
-            item.products.price
+            unit_price:
+              item.products.price
 
-        }));
+          })
+        );
 
 
     const {
       error: orderItemsError
     } = await supabase
       .from('order_items')
-      .insert(orderItems);
+      .insert(
+        orderItems
+      );
 
 
     if (orderItemsError) {
@@ -3043,7 +4977,8 @@ placeOrderBtn?.addEventListener(
       );
 
       checkoutMessage.textContent =
-        'Could not save your order items.';
+        `Could not save your order items.\n${orderItemsError.message}`;
+
 
       placeOrderBtn.disabled =
         false;
@@ -3052,10 +4987,13 @@ placeOrderBtn?.addEventListener(
         'Pay with Paystack';
 
       return;
+
     }
 
 
-    /* CALL PAYSTACK FUNCTION */
+    /* =====================================================
+       PAYSTACK FUNCTION
+    ===================================================== */
 
     const {
       data: payment,
@@ -3093,6 +5031,7 @@ placeOrderBtn?.addEventListener(
       checkoutMessage.textContent =
         'Unable to start Paystack payment.';
 
+
       placeOrderBtn.disabled =
         false;
 
@@ -3100,6 +5039,7 @@ placeOrderBtn?.addEventListener(
         'Pay with Paystack';
 
       return;
+
     }
 
 
@@ -3118,6 +5058,7 @@ placeOrderBtn?.addEventListener(
         payment?.message ||
         'Paystack could not start the payment.';
 
+
       placeOrderBtn.disabled =
         false;
 
@@ -3125,10 +5066,13 @@ placeOrderBtn?.addEventListener(
         'Pay with Paystack';
 
       return;
+
     }
 
 
-    /* REDIRECT TO PAYSTACK */
+    /* =====================================================
+       REDIRECT TO PAYSTACK
+    ===================================================== */
 
     window.location.href =
       payment.data.authorization_url;
@@ -3141,19 +5085,30 @@ placeOrderBtn?.addEventListener(
    MOBILE BOTTOM NAVIGATION
 ========================================================= */
 
-function setBottomNavActive(button) {
+function setBottomNavActive(
+  button
+) {
 
   document
-    .querySelectorAll('.bottom-nav-item')
-    .forEach(item => {
+    .querySelectorAll(
+      '.bottom-nav-item'
+    )
+    .forEach(
+      item => {
 
-      item.classList.remove('active');
+        item.classList.remove(
+          'active'
+        );
 
-    });
+      }
+    );
+
 
   if (button) {
 
-    button.classList.add('active');
+    button.classList.add(
+      'active'
+    );
 
   }
 
@@ -3171,6 +5126,7 @@ bottomHomeBtn?.addEventListener(
     setBottomNavActive(
       bottomHomeBtn
     );
+
 
     window.scrollTo({
       top: 0,
@@ -3192,6 +5148,7 @@ bottomCategoriesBtn?.addEventListener(
     setBottomNavActive(
       bottomCategoriesBtn
     );
+
 
     if (categoriesContainer) {
 
@@ -3218,11 +5175,8 @@ bottomCartBtn?.addEventListener(
       bottomCartBtn
     );
 
-    if (cartBtn) {
 
-      cartBtn.click();
-
-    }
+    cartBtn?.click();
 
   }
 );
@@ -3239,6 +5193,7 @@ bottomWishlistBtn?.addEventListener(
     setBottomNavActive(
       bottomWishlistBtn
     );
+
 
     await openWishlist();
 
@@ -3258,13 +5213,142 @@ bottomAccountBtn?.addEventListener(
       bottomAccountBtn
     );
 
-    if (loginBtn) {
 
-      loginBtn.click();
-
-    }
+    loginBtn?.click();
 
   }
+);
+
+
+/* =========================================================
+   EXTRA HOME / HERO BUTTONS
+========================================================= */
+
+const logoHomeBtn =
+  document.getElementById(
+    'logoHomeBtn'
+  );
+
+const homeNavBtn =
+  document.getElementById(
+    'homeNavBtn'
+  );
+
+const heroShopBtn =
+  document.getElementById(
+    'heroShopBtn'
+  );
+
+const heroDealsBtn =
+  document.getElementById(
+    'heroDealsBtn'
+  );
+
+const allCategoriesBtn =
+  document.getElementById(
+    'allCategoriesBtn'
+  );
+
+const viewAllCategoriesBtn =
+  document.getElementById(
+    'viewAllCategoriesBtn'
+  );
+
+const viewAllProductsBtn =
+  document.getElementById(
+    'viewAllProductsBtn'
+  );
+
+
+function goHome() {
+
+  window.scrollTo({
+    top: 0,
+    behavior: 'smooth'
+  });
+
+}
+
+
+function goToProducts() {
+
+  document
+    .getElementById(
+      'productsSection'
+    )
+    ?.scrollIntoView({
+      behavior: 'smooth',
+      block: 'start'
+    });
+
+}
+
+
+function goToCategories() {
+
+  document
+    .getElementById(
+      'categoriesSection'
+    )
+    ?.scrollIntoView({
+      behavior: 'smooth',
+      block: 'start'
+    });
+
+}
+
+
+logoHomeBtn?.addEventListener(
+  'click',
+  event => {
+
+    event.preventDefault();
+
+    goHome();
+
+  }
+);
+
+
+homeNavBtn?.addEventListener(
+  'click',
+  event => {
+
+    event.preventDefault();
+
+    goHome();
+
+  }
+);
+
+
+heroShopBtn?.addEventListener(
+  'click',
+  goToProducts
+);
+
+
+heroDealsBtn?.addEventListener(
+  'click',
+  goToProducts
+);
+
+
+allCategoriesBtn?.addEventListener(
+  'click',
+  goToCategories
+);
+
+
+viewAllCategoriesBtn?.addEventListener(
+  'click',
+  goToCategories
+);
+
+
+viewAllProductsBtn?.addEventListener(
+  'click',
+  goToProducts
 );
 
 
@@ -3300,9 +5384,9 @@ async function startWebsite() {
 
   await loadCategories();
 
-  await loadWishlistIds();
-
   await loadProducts();
+
+  await loadWishlistIds();
 
   await updateAuthButton();
 
@@ -3333,6 +5417,7 @@ async function handlePaystackCallback() {
   if (!reference) {
 
     return;
+
   }
 
 
@@ -3342,7 +5427,9 @@ async function handlePaystackCallback() {
   );
 
 
-  /* REMOVE REFERENCE FROM URL */
+  /* =====================================================
+     REMOVE REFERENCE FROM URL
+  ===================================================== */
 
   window.history.replaceState(
     {},
@@ -3363,6 +5450,7 @@ async function handlePaystackCallback() {
     );
 
     return;
+
   }
 
 
@@ -3396,6 +5484,7 @@ async function handlePaystackCallback() {
       );
 
       return;
+
     }
 
 
@@ -3405,9 +5494,13 @@ async function handlePaystackCallback() {
     );
 
 
-    if (data?.paid === true) {
+    if (
+      data?.paid === true
+    ) {
 
-      /* CLEAR CART */
+      /* =================================================
+         CLEAR CART
+      ================================================= */
 
       const {
         error: cartError
