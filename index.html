@@ -17,9 +17,7 @@
 
 <body>
 
-  <!-- =====================================================
-       MOBILE BOTTOM NAVIGATION
-  ====================================================== -->
+  <!-- MOBILE BOTTOM NAVIGATION -->
 
   <nav class="bottom-nav" id="bottomNav">
 
@@ -75,9 +73,7 @@
   </nav>
 
 
-  <!-- =====================================================
-       TOP BAR
-  ====================================================== -->
+  <!-- TOP BAR -->
 
   <div class="top-bar">
 
@@ -90,17 +86,9 @@
 
       <div class="top-bar-right">
 
-        <span>
-          🚚 Free delivery on selected orders
-        </span>
-
-        <span>
-          🔒 Secure payment
-        </span>
-
-        <span>
-          📞 Customer support
-        </span>
+        <span>🚚 Free delivery on selected orders</span>
+        <span>🔒 Secure payment</span>
+        <span>📞 Customer support</span>
 
       </div>
 
@@ -109,9 +97,7 @@
   </div>
 
 
-  <!-- =====================================================
-       HEADER
-  ====================================================== -->
+  <!-- HEADER -->
 
   <header class="header">
 
@@ -238,6 +224,19 @@
             </button>
 
 
+            <!-- ADMIN DASHBOARD
+                 Hidden by default.
+                 app.js will display this ONLY for admins. -->
+
+            <button
+              id="adminDashboardBtn"
+              type="button"
+              style="display: none;"
+            >
+              🛠️ Admin Dashboard
+            </button>
+
+
             <button
               id="logoutBtn"
               class="logout-btn"
@@ -281,9 +280,7 @@
     </div>
 
 
-    <!-- =================================================
-         MAIN NAVIGATION
-    ================================================== -->
+    <!-- MAIN NAVIGATION -->
 
     <div class="desktop-navigation">
 
@@ -341,9 +338,7 @@
   </header>
 
 
-  <!-- =====================================================
-       HERO SECTION
-  ====================================================== -->
+  <!-- HERO SECTION -->
 
   <section class="hero-section">
 
@@ -417,9 +412,7 @@
   </section>
 
 
-  <!-- =====================================================
-       TRUST / BENEFITS
-  ====================================================== -->
+  <!-- TRUST / BENEFITS -->
 
   <section class="benefits-section">
 
@@ -427,18 +420,11 @@
 
       <div class="benefit-item">
 
-        <span class="benefit-icon">
-          🚚
-        </span>
+        <span class="benefit-icon">🚚</span>
 
         <div>
-          <strong>
-            Fast Delivery
-          </strong>
-
-          <small>
-            Get your orders quickly
-          </small>
+          <strong>Fast Delivery</strong>
+          <small>Get your orders quickly</small>
         </div>
 
       </div>
@@ -446,18 +432,11 @@
 
       <div class="benefit-item">
 
-        <span class="benefit-icon">
-          🛡️
-        </span>
+        <span class="benefit-icon">🛡️</span>
 
         <div>
-          <strong>
-            Secure Payment
-          </strong>
-
-          <small>
-            100% secure payments
-          </small>
+          <strong>Secure Payment</strong>
+          <small>100% secure payments</small>
         </div>
 
       </div>
@@ -465,18 +444,11 @@
 
       <div class="benefit-item">
 
-        <span class="benefit-icon">
-          ↻
-        </span>
+        <span class="benefit-icon">↻</span>
 
         <div>
-          <strong>
-            Easy Returns
-          </strong>
-
-          <small>
-            Shop with confidence
-          </small>
+          <strong>Easy Returns</strong>
+          <small>Shop with confidence</small>
         </div>
 
       </div>
@@ -486,9 +458,7 @@
   </section>
 
 
-  <!-- =====================================================
-       CATEGORIES
-  ====================================================== -->
+  <!-- CATEGORIES -->
 
   <section
     class="categories-section"
@@ -538,9 +508,7 @@
   </section>
 
 
-  <!-- =====================================================
-       PRODUCTS
-  ====================================================== -->
+  <!-- PRODUCTS -->
 
   <main
     class="container products-main"
@@ -592,9 +560,7 @@
   </main>
 
 
-  <!-- =====================================================
-       PRODUCT DETAILS MODAL
-  ====================================================== -->
+  <!-- PRODUCT DETAILS MODAL -->
 
   <div
     id="productDetailsModal"
@@ -615,15 +581,12 @@
 
       <div class="product-details-grid">
 
-        <!-- PRODUCT IMAGE -->
-
         <div class="product-details-images">
 
           <div
             id="productDetailsThumbnails"
             class="product-thumbnails"
-          >
-          </div>
+          ></div>
 
           <div class="product-main-image-wrapper">
 
@@ -639,15 +602,12 @@
         </div>
 
 
-        <!-- PRODUCT INFORMATION -->
-
         <div class="product-details-info">
 
           <div
             id="productDetailsCategory"
             class="product-details-category"
-          >
-          </div>
+          ></div>
 
           <h2 id="productDetailsName">
             Product Name
@@ -682,14 +642,12 @@
             <span
               id="productDetailsOldPrice"
               class="product-old-price"
-            >
-            </span>
+            ></span>
 
             <span
               id="productDetailsDiscount"
               class="product-discount"
-            >
-            </span>
+            ></span>
 
           </div>
 
@@ -710,8 +668,6 @@
           </div>
 
 
-          <!-- PRODUCT SPECIFICATIONS -->
-
           <div class="product-specifications">
 
             <h3>
@@ -721,13 +677,10 @@
             <div
               id="productDetailsSpecs"
               class="product-specs-list"
-            >
-            </div>
+            ></div>
 
           </div>
 
-
-          <!-- QUANTITY -->
 
           <div class="product-quantity-section">
 
@@ -764,8 +717,6 @@
           </div>
 
 
-          <!-- ACTION BUTTONS -->
-
           <div class="product-details-actions">
 
             <button
@@ -787,29 +738,21 @@
           </div>
 
 
-          <!-- SHOPPING BENEFITS -->
-
           <div class="product-detail-benefits">
 
             <div>
               🚚
-              <strong>
-                Fast Delivery
-              </strong>
+              <strong>Fast Delivery</strong>
             </div>
 
             <div>
               🛡️
-              <strong>
-                Secure Payment
-              </strong>
+              <strong>Secure Payment</strong>
             </div>
 
             <div>
               ↻
-              <strong>
-                Easy Returns
-              </strong>
+              <strong>Easy Returns</strong>
             </div>
 
           </div>
@@ -823,9 +766,7 @@
   </div>
 
 
-  <!-- =====================================================
-       LOGIN / SIGNUP MODAL
-  ====================================================== -->
+  <!-- LOGIN / SIGNUP MODAL -->
 
   <div
     id="authModal"
@@ -938,9 +879,7 @@
   </div>
 
 
-  <!-- =====================================================
-       CHECKOUT MODAL
-  ====================================================== -->
+  <!-- CHECKOUT MODAL -->
 
   <div
     id="checkoutModal"
@@ -1056,9 +995,7 @@
   </div>
 
 
-  <!-- =====================================================
-       ORDERS MODAL
-  ====================================================== -->
+  <!-- ORDERS MODAL -->
 
   <div
     id="ordersModal"
@@ -1075,11 +1012,9 @@
         &times;
       </button>
 
-
       <h2>
         My Orders
       </h2>
-
 
       <div id="ordersList">
 
@@ -1094,9 +1029,7 @@
   </div>
 
 
-  <!-- =====================================================
-       PROFILE MODAL
-  ====================================================== -->
+  <!-- PROFILE MODAL -->
 
   <div
     id="profileModal"
@@ -1113,11 +1046,9 @@
         &times;
       </button>
 
-
       <h2>
         My Profile
       </h2>
-
 
       <p id="profileMessage"></p>
 
@@ -1180,9 +1111,7 @@
   </div>
 
 
-  <!-- =====================================================
-       CART MODAL
-  ====================================================== -->
+  <!-- CART MODAL -->
 
   <div
     id="cartModal"
@@ -1198,7 +1127,6 @@
       >
         &times;
       </button>
-
 
       <h2>
         Your Cart
@@ -1240,9 +1168,7 @@
   </div>
 
 
-  <!-- =====================================================
-       FOOTER
-  ====================================================== -->
+  <!-- FOOTER -->
 
   <footer id="footer">
 
@@ -1325,9 +1251,7 @@
   </footer>
 
 
-  <!-- =====================================================
-       JAVASCRIPT
-  ====================================================== -->
+  <!-- JAVASCRIPT -->
 
   <script
     type="module"
