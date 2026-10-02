@@ -20,6 +20,9 @@ let allProducts = [];
 let signupMode = false;
 let sellerSignupMode = false;
 
+/* Wishlist product IDs */
+let wishlistProductIds = new Set();
+
 
 /* =========================================================
    AUTH ELEMENTS
@@ -114,138 +117,33 @@ const placeOrderBtn = document.getElementById('placeOrderBtn');
 
 
 /* =========================================================
-   LOAD CATEGORIES
+   MOBILE BOTTOM NAVIGATION
 ========================================================= */
 
-async function loadCategories() {
+const bottomHomeBtn =
+  document.getElementById('bottomHomeBtn');
 
-  const { data, error } = await supabase
-    .from('categories')
-    .select('*')
-    .order('name');
+const bottomCategoriesBtn =
+  document.getElementById('bottomCategoriesBtn');
 
-  if (error) {
+const bottomCartBtn =
+  document.getElementById('bottomCartBtn');
 
-    console.error('Category error:', error);
+const bottomWishlistBtn =
+  document.getElementById('bottomWishlistBtn');
 
-    categoriesContainer.innerHTML =
-      '<p>Unable to load categories.</p>';
+const bottomAccountBtn =
+  document.getElementById('bottomAccountBtn');
 
-    return;
-  }
-
-  categoriesContainer.innerHTML = `
-    <button class="category" data-category="all">
-      All Products
-    </button>
-  `;
-
-  data.forEach(category => {
-
-    categoriesContainer.innerHTML += `
-      <button
-        class="category"
-        data-category="${category.id}">
-        ${category.name}
-      </button>
-    `;
-
-  });
-
-  document
-    .querySelectorAll('.category')
-    .forEach(button => {
-
-      button.addEventListener('click', () => {
-
-        const categoryId =
-          button.dataset.category;
-
-        if (categoryId === 'all') {
-
-          displayProducts(allProducts);
-
-        } else {
-
-          const filtered =
-            allProducts.filter(
-              product =>
-                String(product.category_id) ===
-                categoryId
-            );
-
-          displayProducts(filtered);
-
-        }
-
-      });
-
-    });
-
-}
+const bottomCartCount =
+  document.getElementById('bottomCartCount');
 
 
 /* =========================================================
-   LOAD PRODUCTS
+   FALLBACK PRODUCT IMAGE
 ========================================================= */
 
-async function loadProducts() {
-
-  productsContainer.innerHTML =
-    '<p>Loading products...</p>';
-
-  const { data, error } = await supabase
-    .from('products')
-    .select(`
-      *,
-      categories (
-        name
-      )
-    `)
-    .eq('is_active', true)
-    .order('created_at', {
-      ascending: false
-    });
-
-  if (error) {
-
-    console.error('Product error:', error);
-
-    productsContainer.innerHTML =
-      '<p>Unable to load products. Check the browser console.</p>';
-
-    return;
-  }
-
-  allProducts = data || [];
-
-  displayProducts(allProducts);
-
-}
-
-
-/* =========================================================
-   DISPLAY PRODUCTS
-========================================================= */
-
-function displayProducts(products) {
-
-  productCount.textContent =
-    `${products.length} product${products.length === 1 ? '' : 's'}`;
-
-  if (products.length === 0) {
-
-    productsContainer.innerHTML =
-      '<p>No products found.</p>';
-
-    return;
-  }
-
-  productsContainer.innerHTML = '';
-
-  products.forEach(product => {
-
-    const fallbackImage =
+const fallbackImage =
   'data:image/svg+xml;charset=UTF-8,' +
   encodeURIComponent(`
     <svg xmlns="http://www.w3.org/2000/svg"
@@ -282,19 +180,192 @@ function displayProducts(products) {
     </svg>
   `);
 
-const image =
-  product.image_url || fallbackImage;
+
+/* =========================================================
+   LOAD CATEGORIES
+========================================================= */
+
+async function loadCategories() {
+
+  const { data, error } = await supabase
+    .from('categories')
+    .select('*')
+    .order('name');
+
+  if (error) {
+
+    console.error('Category error:', error);
+
+    if (categoriesContainer) {
+      categoriesContainer.innerHTML =
+        '<p>Unable to load categories.</p>';
+    }
+
+    return;
+  }
+
+  if (!categoriesContainer) return;
+
+  categoriesContainer.innerHTML = `
+    <button class="category" data-category="all">
+      All Products
+    </button>
+  `;
+
+  (data || []).forEach(category => {
+
+    categoriesContainer.innerHTML += `
+      <button
+        class="category"
+        data-category="${category.id}">
+        ${category.name}
+      </button>
+    `;
+
+  });
+
+  document
+    .querySelectorAll('.category')
+    .forEach(button => {
+
+      button.addEventListener('click', () => {
+
+        const categoryId =
+          button.dataset.category;
+
+        if (categoryId === 'all') {
+
+          displayProducts(allProducts);
+
+        } else {
+
+          const filtered =
+            allProducts.filter(
+              product =>
+                String(product.category_id) ===
+                String(categoryId)
+            );
+
+          displayProducts(filtered);
+
+        }
+
+      });
+
+    });
+
+}
+
+
+/* =========================================================
+   LOAD PRODUCTS
+========================================================= */
+
+async function loadProducts() {
+
+  if (productsContainer) {
+    productsContainer.innerHTML =
+      '<p>Loading products...</p>';
+  }
+
+  const { data, error } = await supabase
+    .from('products')
+    .select(`
+      *,
+      categories (
+        name
+      )
+    `)
+    .eq('is_active', true)
+    .order('created_at', {
+      ascending: false
+    });
+
+  if (error) {
+
+    console.error('Product error:', error);
+
+    if (productsContainer) {
+      productsContainer.innerHTML =
+        '<p>Unable to load products. Check the browser console.</p>';
+    }
+
+    return;
+  }
+
+  allProducts = data || [];
+
+  displayProducts(allProducts);
+
+}
+
+
+/* =========================================================
+   DISPLAY PRODUCTS
+========================================================= */
+
+function displayProducts(products) {
+
+  if (!productsContainer) return;
+
+  productCount.textContent =
+    `${products.length} product${products.length === 1 ? '' : 's'}`;
+
+  if (products.length === 0) {
+
+    productsContainer.innerHTML =
+      '<p>No products found.</p>';
+
+    return;
+  }
+
+  productsContainer.innerHTML = '';
+
+  products.forEach(product => {
+
+    const image =
+      product.image_url || fallbackImage;
+
+    const isWishlisted =
+      wishlistProductIds.has(
+        String(product.id)
+      );
 
     productsContainer.innerHTML += `
 
-      <article class="product">
+      <article class="product" style="position:relative;">
+
+        <button
+          class="product-wishlist-btn ${isWishlisted ? 'active' : ''}"
+          data-product-id="${product.id}"
+          aria-label="${isWishlisted ? 'Remove from wishlist' : 'Add to wishlist'}"
+          title="${isWishlisted ? 'Remove from wishlist' : 'Add to wishlist'}"
+          style="
+            position:absolute;
+            top:10px;
+            right:10px;
+            z-index:5;
+            width:40px;
+            height:40px;
+            border:none;
+            border-radius:50%;
+            background:#ffffff;
+            box-shadow:0 2px 10px rgba(0,0,0,0.12);
+            cursor:pointer;
+            font-size:25px;
+            line-height:40px;
+            padding:0;
+            color:${isWishlisted ? '#ff3b30' : '#222'};
+          ">
+          ${isWishlisted ? '♥' : '♡'}
+        </button>
 
         <img
-  class="product-image"
-  src="${image}"
-  alt="${product.name}"
-  onerror="this.onerror=null; this.src='${fallbackImage}';"
->
+          class="product-image"
+          src="${image}"
+          alt="${product.name}"
+          onerror="this.onerror=null; this.src='${fallbackImage}';"
+        >
 
         <div class="product-info">
 
@@ -320,6 +391,9 @@ const image =
 
   });
 
+
+  /* ADD TO CART BUTTONS */
+
   document
     .querySelectorAll('.add-cart')
     .forEach(button => {
@@ -327,6 +401,25 @@ const image =
       button.addEventListener('click', () => {
 
         addToCart(
+          button.dataset.productId
+        );
+
+      });
+
+    });
+
+
+  /* WISHLIST BUTTONS */
+
+  document
+    .querySelectorAll('.product-wishlist-btn')
+    .forEach(button => {
+
+      button.addEventListener('click', event => {
+
+        event.stopPropagation();
+
+        toggleWishlist(
           button.dataset.productId
         );
 
@@ -342,6 +435,8 @@ const image =
 ========================================================= */
 
 function searchProducts() {
+
+  if (!searchInput) return;
 
   const searchTerm =
     searchInput.value.trim().toLowerCase();
@@ -378,13 +473,13 @@ function searchProducts() {
 }
 
 
-searchBtn.addEventListener(
+searchBtn?.addEventListener(
   'click',
   searchProducts
 );
 
 
-searchInput.addEventListener(
+searchInput?.addEventListener(
   'keydown',
   event => {
 
@@ -495,7 +590,13 @@ async function updateCartCount() {
 
   if (!user) {
 
-    cartCount.textContent = '0';
+    if (cartCount) {
+      cartCount.textContent = '0';
+    }
+
+    if (bottomCartCount) {
+      bottomCartCount.textContent = '0';
+    }
 
     return;
   }
@@ -513,13 +614,19 @@ async function updateCartCount() {
   }
 
   const count =
-    data.reduce(
+    (data || []).reduce(
       (total, item) =>
-        total + item.quantity,
+        total + Number(item.quantity || 0),
       0
     );
 
-  cartCount.textContent = count;
+  if (cartCount) {
+    cartCount.textContent = count;
+  }
+
+  if (bottomCartCount) {
+    bottomCartCount.textContent = count;
+  }
 
 }
 
@@ -528,7 +635,7 @@ async function updateCartCount() {
    LOGIN / ACCOUNT BUTTON
 ========================================================= */
 
-loginBtn.addEventListener(
+loginBtn?.addEventListener(
   'click',
   async event => {
 
@@ -540,18 +647,20 @@ loginBtn.addEventListener(
 
     if (!user) {
 
-      accountMenu.classList.remove('show');
+      accountMenu?.classList.remove('show');
 
-      authMessage.textContent = '';
+      if (authMessage) {
+        authMessage.textContent = '';
+      }
 
-      authModal.classList.add('show');
+      authModal?.classList.add('show');
 
       return;
     }
 
     await loadAccount();
 
-    accountMenu.classList.toggle('show');
+    accountMenu?.classList.toggle('show');
 
   }
 );
@@ -579,8 +688,6 @@ if (becomeSellerBtn) {
       }
 
 
-      /* CHECK CURRENT ROLE */
-
       const {
         data: profile,
         error: profileError
@@ -605,8 +712,6 @@ if (becomeSellerBtn) {
       }
 
 
-      /* ALREADY SELLER */
-
       if (profile?.role === 'seller') {
 
         window.location.href =
@@ -616,25 +721,23 @@ if (becomeSellerBtn) {
       }
 
 
-      /* ADMIN */
+      if (profile?.role === 'admin') {
 
-if (profile?.role === 'admin') {
+        const openAdmin =
+          confirm(
+            'You are an administrator.\n\n' +
+            'Would you like to open the Admin Dashboard?'
+          );
 
-  const openAdmin =
-    confirm(
-      'You are an administrator.\n\n' +
-      'Would you like to open the Admin Dashboard?'
-    );
+        if (openAdmin) {
 
-  if (openAdmin) {
+          window.location.href =
+            'admin.html';
 
-    window.location.href =
-      'admin.html';
+        }
 
-  }
-
-  return;
-}
+        return;
+      }
 
 
       const confirmed =
@@ -697,11 +800,11 @@ if (profile?.role === 'admin') {
    CLOSE LOGIN MODAL
 ========================================================= */
 
-closeAuth.addEventListener(
+closeAuth?.addEventListener(
   'click',
   () => {
 
-    authModal.classList.remove('show');
+    authModal?.classList.remove('show');
 
   }
 );
@@ -711,7 +814,7 @@ closeAuth.addEventListener(
    SWITCH LOGIN / CUSTOMER SIGNUP
 ========================================================= */
 
-switchAuth.addEventListener(
+switchAuth?.addEventListener(
   'click',
   () => {
 
@@ -808,7 +911,7 @@ if (sellerSignupBtn) {
    LOGIN / SIGNUP SUBMIT
 ========================================================= */
 
-authForm.addEventListener(
+authForm?.addEventListener(
   'submit',
   async event => {
 
@@ -1002,6 +1105,8 @@ authForm.addEventListener(
 
         await updateCartCount();
 
+        await loadWishlistIds();
+
       },
       700
     );
@@ -1030,7 +1135,7 @@ async function updateAuthButton() {
     loginBtn.textContent =
       'Login';
 
-    accountMenu.classList.remove(
+    accountMenu?.classList.remove(
       'show'
     );
 
@@ -1088,7 +1193,7 @@ async function loadAccount() {
    LOG OUT
 ========================================================= */
 
-logoutBtn.addEventListener(
+logoutBtn?.addEventListener(
   'click',
   async event => {
 
@@ -1106,9 +1211,13 @@ logoutBtn.addEventListener(
       return;
     }
 
-    accountMenu.classList.remove(
+    accountMenu?.classList.remove(
       'show'
     );
+
+    wishlistProductIds.clear();
+
+    displayProducts(allProducts);
 
     await updateAuthButton();
 
@@ -1131,9 +1240,8 @@ document.addEventListener(
   event => {
 
     if (
-      !accountMenu.contains(
-        event.target
-      ) &&
+      accountMenu &&
+      !accountMenu.contains(event.target) &&
       event.target !== loginBtn
     ) {
 
@@ -1151,11 +1259,11 @@ document.addEventListener(
    PROFILE
 ========================================================= */
 
-profileBtn.addEventListener(
+profileBtn?.addEventListener(
   'click',
   async () => {
 
-    accountMenu.classList.remove(
+    accountMenu?.classList.remove(
       'show'
     );
 
@@ -1226,11 +1334,11 @@ profileBtn.addEventListener(
    CLOSE PROFILE
 ========================================================= */
 
-closeProfile.addEventListener(
+closeProfile?.addEventListener(
   'click',
   () => {
 
-    profileModal.classList.remove(
+    profileModal?.classList.remove(
       'show'
     );
 
@@ -1242,7 +1350,7 @@ closeProfile.addEventListener(
    SAVE PROFILE
 ========================================================= */
 
-saveProfileBtn.addEventListener(
+saveProfileBtn?.addEventListener(
   'click',
   async () => {
 
@@ -1325,15 +1433,15 @@ saveProfileBtn.addEventListener(
    MY ORDERS
 ========================================================= */
 
-ordersBtn.addEventListener(
+ordersBtn?.addEventListener(
   'click',
   async () => {
 
-    accountMenu.classList.remove(
+    accountMenu?.classList.remove(
       'show'
     );
 
-    ordersModal.classList.add(
+    ordersModal?.classList.add(
       'show'
     );
 
@@ -1343,11 +1451,11 @@ ordersBtn.addEventListener(
 );
 
 
-closeOrders.addEventListener(
+closeOrders?.addEventListener(
   'click',
   () => {
 
-    ordersModal.classList.remove(
+    ordersModal?.classList.remove(
       'show'
     );
 
@@ -1360,6 +1468,8 @@ closeOrders.addEventListener(
 ========================================================= */
 
 async function loadOrders() {
+
+  if (!ordersList) return;
 
   ordersList.innerHTML =
     '<p>Loading orders...</p>';
@@ -1491,17 +1601,597 @@ async function loadOrders() {
    WISHLIST
 ========================================================= */
 
-wishlistBtn.addEventListener(
-  'click',
-  () => {
+/*
+  Load only the product IDs currently in the user's wishlist.
+*/
 
-    accountMenu.classList.remove(
+async function loadWishlistIds() {
+
+  const {
+    data: { user }
+  } = await supabase.auth.getUser();
+
+  wishlistProductIds.clear();
+
+  if (!user) {
+
+    displayProducts(allProducts);
+
+    return;
+
+  }
+
+  const {
+    data,
+    error
+  } = await supabase
+    .from('wishlist')
+    .select('product_id')
+    .eq('user_id', user.id);
+
+  if (error) {
+
+    console.error(
+      'Wishlist loading error:',
+      error
+    );
+
+    displayProducts(allProducts);
+
+    return;
+  }
+
+  (data || []).forEach(item => {
+
+    wishlistProductIds.add(
+      String(item.product_id)
+    );
+
+  });
+
+  displayProducts(allProducts);
+
+}
+
+
+/* =========================================================
+   TOGGLE WISHLIST
+========================================================= */
+
+async function toggleWishlist(productId) {
+
+  const {
+    data: { user }
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+
+    authMessage.textContent =
+      'Please log in to use your wishlist.';
+
+    authModal.classList.add('show');
+
+    return;
+  }
+
+  const productKey =
+    String(productId);
+
+  const alreadyWishlisted =
+    wishlistProductIds.has(productKey);
+
+
+  /* REMOVE FROM WISHLIST */
+
+  if (alreadyWishlisted) {
+
+    const {
+      error
+    } = await supabase
+      .from('wishlist')
+      .delete()
+      .eq('user_id', user.id)
+      .eq('product_id', productId);
+
+    if (error) {
+
+      console.error(
+        'Remove wishlist error:',
+        error
+      );
+
+      alert(
+        'Could not remove this product from your wishlist.'
+      );
+
+      return;
+    }
+
+    wishlistProductIds.delete(
+      productKey
+    );
+
+  }
+
+
+  /* ADD TO WISHLIST */
+
+  else {
+
+    const {
+      error
+    } = await supabase
+      .from('wishlist')
+      .insert({
+        user_id: user.id,
+        product_id: productId
+      });
+
+    if (error) {
+
+      console.error(
+        'Add wishlist error:',
+        error
+      );
+
+      alert(
+        'Could not add this product to your wishlist.'
+      );
+
+      return;
+    }
+
+    wishlistProductIds.add(
+      productKey
+    );
+
+  }
+
+
+  /*
+    Refresh product cards so the heart
+    changes immediately.
+  */
+
+  const searchTerm =
+    searchInput?.value.trim().toLowerCase() || '';
+
+  if (searchTerm) {
+
+    searchProducts();
+
+  } else {
+
+    displayProducts(allProducts);
+
+  }
+
+}
+
+
+/* =========================================================
+   CREATE WISHLIST MODAL
+========================================================= */
+
+function createWishlistModal() {
+
+  if (document.getElementById('wishlistModal')) {
+    return document.getElementById('wishlistModal');
+  }
+
+
+  const modal =
+    document.createElement('div');
+
+  modal.id =
+    'wishlistModal';
+
+  modal.className =
+    'modal';
+
+
+  modal.innerHTML = `
+
+    <div
+      class="modal-content"
+      style="
+        max-width:650px;
+        width:92%;
+        max-height:85vh;
+        overflow-y:auto;
+      ">
+
+      <div
+        style="
+          display:flex;
+          align-items:center;
+          justify-content:space-between;
+          gap:15px;
+          margin-bottom:20px;
+        ">
+
+        <h2 style="margin:0;">
+          ❤️ My Wishlist
+        </h2>
+
+        <button
+          id="closeWishlist"
+          type="button"
+          style="
+            border:none;
+            background:none;
+            font-size:30px;
+            cursor:pointer;
+            line-height:1;
+          ">
+          ×
+        </button>
+
+      </div>
+
+      <div id="wishlistItems">
+        <p>Loading wishlist...</p>
+      </div>
+
+    </div>
+
+  `;
+
+
+  document.body.appendChild(modal);
+
+
+  const closeWishlist =
+    document.getElementById('closeWishlist');
+
+
+  closeWishlist?.addEventListener(
+    'click',
+    () => {
+
+      modal.classList.remove('show');
+
+    }
+  );
+
+
+  modal.addEventListener(
+    'click',
+    event => {
+
+      if (event.target === modal) {
+
+        modal.classList.remove('show');
+
+      }
+
+    }
+  );
+
+
+  return modal;
+
+}
+
+
+/* =========================================================
+   OPEN WISHLIST
+========================================================= */
+
+async function openWishlist() {
+
+  accountMenu?.classList.remove(
+    'show'
+  );
+
+
+  const {
+    data: { user }
+  } = await supabase.auth.getUser();
+
+
+  if (!user) {
+
+    authMessage.textContent =
+      'Please log in to view your wishlist.';
+
+    authModal.classList.add(
       'show'
     );
 
-    alert(
-      'Wishlist will be added next.'
+    return;
+  }
+
+
+  const modal =
+    createWishlistModal();
+
+
+  modal.classList.add(
+    'show'
+  );
+
+
+  await loadWishlistItems();
+
+}
+
+
+/* =========================================================
+   LOAD WISHLIST ITEMS
+========================================================= */
+
+async function loadWishlistItems() {
+
+  const wishlistItems =
+    document.getElementById('wishlistItems');
+
+  if (!wishlistItems) return;
+
+
+  wishlistItems.innerHTML =
+    '<p>Loading wishlist...</p>';
+
+
+  const {
+    data: { user }
+  } = await supabase.auth.getUser();
+
+
+  if (!user) {
+
+    wishlistItems.innerHTML =
+      '<p>Please log in to view your wishlist.</p>';
+
+    return;
+  }
+
+
+  const {
+    data,
+    error
+  } = await supabase
+    .from('wishlist')
+    .select(`
+      id,
+      product_id,
+      products (
+        name,
+        price,
+        image_url,
+        stock
+      )
+    `)
+    .eq('user_id', user.id);
+
+
+  if (error) {
+
+    console.error(
+      'Wishlist error:',
+      error
     );
+
+    wishlistItems.innerHTML =
+      '<p>Unable to load your wishlist.</p>';
+
+    return;
+  }
+
+
+  if (!data || data.length === 0) {
+
+    wishlistItems.innerHTML = `
+
+      <div
+        style="
+          text-align:center;
+          padding:35px 15px;
+        ">
+
+        <div style="font-size:55px;">
+          ♡
+        </div>
+
+        <h3>
+          Your wishlist is empty
+        </h3>
+
+        <p>
+          Tap the heart on any product to save it here.
+        </p>
+
+      </div>
+
+    `;
+
+    return;
+  }
+
+
+  wishlistItems.innerHTML =
+    '';
+
+
+  data.forEach(item => {
+
+    const product =
+      item.products;
+
+
+    if (!product) return;
+
+
+    const image =
+      product.image_url ||
+      fallbackImage;
+
+
+    const stock =
+      Number(product.stock || 0);
+
+
+    wishlistItems.innerHTML += `
+
+      <div
+        class="wishlist-item"
+        style="
+          display:flex;
+          align-items:center;
+          gap:14px;
+          padding:14px 0;
+          border-bottom:1px solid #eee;
+        ">
+
+        <img
+          src="${image}"
+          alt="${product.name}"
+          style="
+            width:80px;
+            height:80px;
+            object-fit:cover;
+            border-radius:10px;
+            background:#f5f5f5;
+          "
+          onerror="this.onerror=null; this.src='${fallbackImage}';"
+        >
+
+        <div
+          style="
+            flex:1;
+            min-width:0;
+          ">
+
+          <h4
+            style="
+              margin:0 0 6px;
+              font-size:16px;
+            ">
+            ${product.name}
+          </h4>
+
+          <p
+            style="
+              margin:0 0 8px;
+              font-weight:700;
+              color:#ff7900;
+            ">
+            GH₵ ${Number(product.price).toFixed(2)}
+          </p>
+
+          <p
+            style="
+              margin:0;
+              font-size:12px;
+              color:${stock > 0 ? '#16803c' : '#d00'};
+            ">
+            ${stock > 0 ? `${stock} available` : 'Out of stock'}
+          </p>
+
+        </div>
+
+        <div
+          style="
+            display:flex;
+            flex-direction:column;
+            gap:6px;
+          ">
+
+          <button
+            class="wishlist-cart-btn"
+            data-product-id="${product.id}"
+            ${stock <= 0 ? 'disabled' : ''}
+            style="
+              border:none;
+              border-radius:7px;
+              background:${stock > 0 ? '#ff7900' : '#ccc'};
+              color:white;
+              padding:8px 10px;
+              cursor:${stock > 0 ? 'pointer' : 'not-allowed'};
+              font-size:12px;
+            ">
+            ${stock > 0 ? 'Add to Cart' : 'Out of Stock'}
+          </button>
+
+          <button
+            class="wishlist-remove-btn"
+            data-product-id="${product.id}"
+            style="
+              border:1px solid #ddd;
+              border-radius:7px;
+              background:white;
+              color:#d00;
+              padding:7px 10px;
+              cursor:pointer;
+              font-size:12px;
+            ">
+            Remove
+          </button>
+
+        </div>
+
+      </div>
+
+    `;
+
+  });
+
+
+  /* ADD TO CART FROM WISHLIST */
+
+  document
+    .querySelectorAll('.wishlist-cart-btn')
+    .forEach(button => {
+
+      button.addEventListener(
+        'click',
+        async () => {
+
+          if (button.disabled) return;
+
+          await addToCart(
+            button.dataset.productId
+          );
+
+        }
+      );
+
+    });
+
+
+  /* REMOVE FROM WISHLIST */
+
+  document
+    .querySelectorAll('.wishlist-remove-btn')
+    .forEach(button => {
+
+      button.addEventListener(
+        'click',
+        async () => {
+
+          await toggleWishlist(
+            button.dataset.productId
+          );
+
+          await loadWishlistItems();
+
+        }
+      );
+
+    });
+
+}
+
+
+/* =========================================================
+   WISHLIST ACCOUNT BUTTON
+========================================================= */
+
+wishlistBtn?.addEventListener(
+  'click',
+  async () => {
+
+    await openWishlist();
 
   }
 );
@@ -1511,7 +2201,7 @@ wishlistBtn.addEventListener(
    CART BUTTON
 ========================================================= */
 
-cartBtn.addEventListener(
+cartBtn?.addEventListener(
   'click',
   async () => {
 
@@ -1548,11 +2238,11 @@ cartBtn.addEventListener(
    CLOSE CART
 ========================================================= */
 
-closeCart.addEventListener(
+closeCart?.addEventListener(
   'click',
   () => {
 
-    cartModal.classList.remove(
+    cartModal?.classList.remove(
       'show'
     );
 
@@ -1565,6 +2255,8 @@ closeCart.addEventListener(
 ========================================================= */
 
 async function loadCart() {
+
+  if (!cartItemsContainer) return;
 
   cartItemsContainer.innerHTML =
     '<p>Loading cart...</p>';
@@ -1673,13 +2365,11 @@ async function loadCart() {
           alt="${product.name}"
         >
 
-
         <div class="cart-item-info">
 
           <h4>
             ${product.name}
           </h4>
-
 
           <div class="cart-item-price">
 
@@ -1688,7 +2378,6 @@ async function loadCart() {
             ).toFixed(2)}
 
           </div>
-
 
           <div class="cart-controls">
 
@@ -1699,11 +2388,9 @@ async function loadCart() {
               −
             </button>
 
-
             <span>
               ${item.quantity}
             </span>
-
 
             <button
               class="quantity-plus"
@@ -1712,7 +2399,6 @@ async function loadCart() {
               data-stock="${product.stock}">
               +
             </button>
-
 
             <button
               class="remove-cart"
@@ -1928,7 +2614,7 @@ async function removeCartItem(id) {
    OPEN CHECKOUT
 ========================================================= */
 
-checkoutBtn.addEventListener(
+checkoutBtn?.addEventListener(
   'click',
   async () => {
 
@@ -1939,11 +2625,11 @@ checkoutBtn.addEventListener(
 
     if (!user) {
 
-      cartModal.classList.remove(
+      cartModal?.classList.remove(
         'show'
       );
 
-      authModal.classList.add(
+      authModal?.classList.add(
         'show'
       );
 
@@ -2075,11 +2761,11 @@ async function prepareCheckout() {
    CLOSE CHECKOUT
 ========================================================= */
 
-closeCheckout.addEventListener(
+closeCheckout?.addEventListener(
   'click',
   () => {
 
-    checkoutModal.classList.remove(
+    checkoutModal?.classList.remove(
       'show'
     );
 
@@ -2091,7 +2777,7 @@ closeCheckout.addEventListener(
    PLACE ORDER + PAYSTACK
 ========================================================= */
 
-placeOrderBtn.addEventListener(
+placeOrderBtn?.addEventListener(
   'click',
   async () => {
 
@@ -2452,6 +3138,137 @@ placeOrderBtn.addEventListener(
 
 
 /* =========================================================
+   MOBILE BOTTOM NAVIGATION
+========================================================= */
+
+function setBottomNavActive(button) {
+
+  document
+    .querySelectorAll('.bottom-nav-item')
+    .forEach(item => {
+
+      item.classList.remove('active');
+
+    });
+
+  if (button) {
+
+    button.classList.add('active');
+
+  }
+
+}
+
+
+/* =========================================================
+   HOME
+========================================================= */
+
+bottomHomeBtn?.addEventListener(
+  'click',
+  () => {
+
+    setBottomNavActive(
+      bottomHomeBtn
+    );
+
+    window.scrollTo({
+      top: 0,
+      behavior: 'smooth'
+    });
+
+  }
+);
+
+
+/* =========================================================
+   CATEGORIES
+========================================================= */
+
+bottomCategoriesBtn?.addEventListener(
+  'click',
+  () => {
+
+    setBottomNavActive(
+      bottomCategoriesBtn
+    );
+
+    if (categoriesContainer) {
+
+      categoriesContainer.scrollIntoView({
+        behavior: 'smooth',
+        block: 'start'
+      });
+
+    }
+
+  }
+);
+
+
+/* =========================================================
+   CART
+========================================================= */
+
+bottomCartBtn?.addEventListener(
+  'click',
+  () => {
+
+    setBottomNavActive(
+      bottomCartBtn
+    );
+
+    if (cartBtn) {
+
+      cartBtn.click();
+
+    }
+
+  }
+);
+
+
+/* =========================================================
+   WISHLIST
+========================================================= */
+
+bottomWishlistBtn?.addEventListener(
+  'click',
+  async () => {
+
+    setBottomNavActive(
+      bottomWishlistBtn
+    );
+
+    await openWishlist();
+
+  }
+);
+
+
+/* =========================================================
+   ACCOUNT
+========================================================= */
+
+bottomAccountBtn?.addEventListener(
+  'click',
+  () => {
+
+    setBottomNavActive(
+      bottomAccountBtn
+    );
+
+    if (loginBtn) {
+
+      loginBtn.click();
+
+    }
+
+  }
+);
+
+
+/* =========================================================
    AUTH STATE
 ========================================================= */
 
@@ -2464,6 +3281,8 @@ supabase.auth.onAuthStateChange(
         await updateAuthButton();
 
         await updateCartCount();
+
+        await loadWishlistIds();
 
       },
       0
@@ -2480,6 +3299,8 @@ supabase.auth.onAuthStateChange(
 async function startWebsite() {
 
   await loadCategories();
+
+  await loadWishlistIds();
 
   await loadProducts();
 
@@ -2620,7 +3441,7 @@ async function handlePaystackCallback() {
       );
 
 
-      ordersModal.classList.add(
+      ordersModal?.classList.add(
         'show'
       );
 
