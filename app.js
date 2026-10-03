@@ -5069,7 +5069,83 @@ placeOrderBtn?.addEventListener(
 
     }
 
+// ===============================
+// MOBILE MONEY PAYMENT
+// ===============================
 
+const paymentMethod =
+  document.querySelector(
+    'input[name="paymentMethod"]:checked'
+  )?.value;
+
+if (paymentMethod === 'mobile_money') {
+
+  const network =
+    document.getElementById(
+      'mobileMoneyNetwork'
+    )?.value;
+
+  const reference =
+    document.getElementById(
+      'mobileMoneyReference'
+    )?.value.trim();
+
+  if (!reference) {
+
+    checkoutMessage.textContent =
+      'Please enter your Mobile Money transaction/reference ID.';
+
+    placeOrderBtn.disabled = false;
+
+    placeOrderBtn.textContent =
+      'Place Order';
+
+    return;
+  }
+
+  // Keep the order as pending until the admin
+  // manually verifies the Mobile Money payment.
+
+  const {
+    error: momoError
+  } = await supabase
+    .from('orders')
+    .update({
+      payment_method: 'mobile_money',
+      payment_status: 'pending_verification',
+      payment_reference: reference
+    })
+    .eq('id', order.id)
+    .eq('user_id', user.id);
+
+  if (momoError) {
+
+    console.error(
+      'Mobile Money update error:',
+      momoError
+    );
+
+    checkoutMessage.textContent =
+      'Your order was created, but we could not save the Mobile Money details.';
+
+    placeOrderBtn.disabled = false;
+
+    placeOrderBtn.textContent =
+      'Place Order';
+
+    return;
+  }
+
+  checkoutMessage.textContent =
+    `Order received. Please send GH₵ ${total.toFixed(2)} via ${network} and wait for payment verification.`;
+
+  placeOrderBtn.disabled = false;
+
+  placeOrderBtn.textContent =
+    'Place Order';
+
+  return;
+}
     /* =====================================================
        REDIRECT TO PAYSTACK
     ===================================================== */
