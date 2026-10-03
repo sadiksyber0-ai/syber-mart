@@ -903,64 +903,61 @@
 
 
       <p id="checkoutMessage"></p>
-      <!-- MOBILE MONEY PAYMENT -->
-<div class="payment-method-section">
+      <div class="payment-method-section">
 
   <h3>Payment Method</h3>
 
-  <label class="payment-option">
-    <input
-      type="radio"
-      name="paymentMethod"
-      value="mobile_money"
-      checked
-    >
+  <label>
+    <input type="radio" name="paymentMethod" value="mobile_money" checked>
     📱 Mobile Money
   </label>
 
-  <label class="payment-option">
-    <input
-      type="radio"
-      name="paymentMethod"
-      value="paystack"
-    >
+  <label>
+    <input type="radio" name="paymentMethod" value="paystack">
     💳 Paystack
   </label>
 
   <div id="mobileMoneyPayment">
 
-    <p><strong>Send payment to:</strong></p>
+    <label for="mobileMoneyNetwork">
+      Mobile Money Network
+    </label>
 
     <select id="mobileMoneyNetwork">
-      <option value="telecel">Telecel Cash</option>
-      <option value="mtn">MTN Mobile Money</option>
+      <option value="MTN">MTN Mobile Money</option>
+      <option value="Telecel">Telecel Cash</option>
     </select>
 
     <div id="mobileMoneyDetails">
+      <strong>Send payment to:</strong>
 
-      <strong>Telecel Cash</strong><br>
-      ABDUOL RAHMAN ABUBAKAR DEISHINI<br>
-      <strong>0504768257</strong>
+      <p>
+        <strong>Name:</strong>
+        ABDUL RAHMAN ABUBAKAR DEISHINI
+      </p>
 
+      <p>
+        <strong>Network:</strong> MTN
+      </p>
+
+      <p>
+        <strong>Number:</strong> 0551430109
+      </p>
+
+      <p>
+        Send the exact checkout amount, then enter your transaction/reference ID below.
+      </p>
     </div>
 
-    <p>
-      Send the exact order amount to the selected number.
-    </p>
+    <label for="mobileMoneyReference">
+      Transaction / Reference ID
+    </label>
 
-    <div class="form-group">
-
-      <label for="mobileMoneyReference">
-        Transaction / Reference ID
-      </label>
-
-      <input
-        type="text"
-        id="mobileMoneyReference"
-        placeholder="Enter your MoMo transaction ID"
-      >
-
-    </div>
+    <input
+      type="text"
+      id="mobileMoneyReference"
+      placeholder="Enter your MoMo transaction ID"
+    >
 
   </div>
 
