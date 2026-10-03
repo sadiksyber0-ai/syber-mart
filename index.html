@@ -21,51 +21,28 @@
 
   <nav class="bottom-nav" id="bottomNav">
 
-    <button
-      class="bottom-nav-item active"
-      id="bottomHomeBtn"
-      type="button"
-    >
+    <button class="bottom-nav-item active" id="bottomHomeBtn" type="button">
       <span class="bottom-icon">⌂</span>
       <span>Home</span>
     </button>
 
-    <button
-      class="bottom-nav-item"
-      id="bottomCategoriesBtn"
-      type="button"
-    >
+    <button class="bottom-nav-item" id="bottomCategoriesBtn" type="button">
       <span class="bottom-icon">☷</span>
       <span>Categories</span>
     </button>
 
-    <button
-      class="bottom-nav-item"
-      id="bottomCartBtn"
-      type="button"
-    >
+    <button class="bottom-nav-item" id="bottomCartBtn" type="button">
       <span class="bottom-icon">🛒</span>
       <span>Cart</span>
-      <span
-        class="bottom-cart-badge"
-        id="bottomCartCount"
-      >0</span>
+      <span class="bottom-cart-badge" id="bottomCartCount">0</span>
     </button>
 
-    <button
-      class="bottom-nav-item"
-      id="bottomWishlistBtn"
-      type="button"
-    >
+    <button class="bottom-nav-item" id="bottomWishlistBtn" type="button">
       <span class="bottom-icon">♡</span>
       <span>Wishlist</span>
     </button>
 
-    <button
-      class="bottom-nav-item"
-      id="bottomAccountBtn"
-      type="button"
-    >
+    <button class="bottom-nav-item" id="bottomAccountBtn" type="button">
       <span class="bottom-icon">♙</span>
       <span>Account</span>
     </button>
@@ -80,16 +57,13 @@
     <div class="container top-bar-content">
 
       <div>
-        Welcome to
-        <strong>SYBER MART</strong>
+        Welcome to <strong>SYBER MART</strong>
       </div>
 
       <div class="top-bar-right">
-
         <span>🚚 Free delivery on selected orders</span>
         <span>🔒 Secure payment</span>
         <span>📞 Customer support</span>
-
       </div>
 
     </div>
@@ -103,13 +77,7 @@
 
     <div class="container header-content">
 
-      <!-- LOGO -->
-
-      <a
-        href="#"
-        class="logo"
-        id="logoHomeBtn"
-      >
+      <a href="#" class="logo" id="logoHomeBtn">
         SYBER <span>MART</span>
       </a>
 
@@ -125,11 +93,7 @@
           autocomplete="off"
         >
 
-        <button
-          id="searchBtn"
-          type="button"
-          aria-label="Search"
-        >
+        <button id="searchBtn" type="button" aria-label="Search">
           🔍
         </button>
 
@@ -166,12 +130,7 @@
           </button>
 
 
-          <!-- ACCOUNT MENU -->
-
-          <div
-            id="accountMenu"
-            class="account-menu"
-          >
+          <div id="accountMenu" class="account-menu">
 
             <div class="account-header">
 
@@ -192,41 +151,27 @@
             </div>
 
 
-            <button
-              id="becomeSellerBtn"
-              type="button"
-            >
+            <button id="becomeSellerBtn" type="button">
               🏪 Become a Seller
             </button>
 
 
-            <button
-              id="profileBtn"
-              type="button"
-            >
+            <button id="profileBtn" type="button">
               👤 My Profile
             </button>
 
 
-            <button
-              id="ordersBtn"
-              type="button"
-            >
+            <button id="ordersBtn" type="button">
               📦 My Orders
             </button>
 
 
-            <button
-              id="wishlistBtn"
-              type="button"
-            >
+            <button id="wishlistBtn" type="button">
               ❤️ Wishlist
             </button>
 
 
-            <!-- ADMIN DASHBOARD
-                 Hidden by default.
-                 app.js will display this ONLY for admins. -->
+            <!-- ADMIN DASHBOARD -->
 
             <button
               id="adminDashboardBtn"
@@ -262,14 +207,9 @@
             🛒
           </span>
 
-          <span>
-            Cart
-          </span>
+          <span>Cart</span>
 
-          <span
-            id="cartCount"
-            class="cart-count"
-          >
+          <span id="cartCount" class="cart-count">
             0
           </span>
 
@@ -297,10 +237,7 @@
 
         <nav class="main-nav">
 
-          <a
-            href="#"
-            id="homeNavBtn"
-          >
+          <a href="#" id="homeNavBtn">
             Home
           </a>
 
@@ -338,7 +275,7 @@
   </header>
 
 
-  <!-- HERO SECTION -->
+  <!-- HERO -->
 
   <section class="hero-section">
 
@@ -412,7 +349,7 @@
   </section>
 
 
-  <!-- TRUST / BENEFITS -->
+  <!-- BENEFITS -->
 
   <section class="benefits-section">
 
@@ -492,10 +429,7 @@
       </div>
 
 
-      <div
-        id="categories"
-        class="categories"
-      >
+      <div id="categories" class="categories">
 
         <p>
           Loading categories...
@@ -546,10 +480,7 @@
     </div>
 
 
-    <div
-      id="products"
-      class="products"
-    >
+    <div id="products" class="products">
 
       <p>
         Loading products...
@@ -768,10 +699,7 @@
 
   <!-- LOGIN / SIGNUP MODAL -->
 
-  <div
-    id="authModal"
-    class="modal"
-  >
+  <div id="authModal" class="modal">
 
     <div class="auth-box">
 
@@ -881,10 +809,7 @@
 
   <!-- CHECKOUT MODAL -->
 
-  <div
-    id="checkoutModal"
-    class="modal"
-  >
+  <div id="checkoutModal" class="modal">
 
     <div class="auth-box checkout-box">
 
@@ -903,66 +828,145 @@
 
 
       <p id="checkoutMessage"></p>
+
+
+      <!-- PAYMENT METHOD -->
+
       <div class="payment-method-section">
 
-  <h3>Payment Method</h3>
+        <h3>
+          Payment Method
+        </h3>
 
-  <label>
-    <input type="radio" name="paymentMethod" value="mobile_money" checked>
-    📱 Mobile Money
-  </label>
 
-  <label>
-    <input type="radio" name="paymentMethod" value="paystack">
-    💳 Paystack
-  </label>
+        <label class="payment-option">
 
-  <div id="mobileMoneyPayment">
+          <input
+            type="radio"
+            name="paymentMethod"
+            value="mobile_money"
+            checked
+          >
 
-    <label for="mobileMoneyNetwork">
-      Mobile Money Network
-    </label>
+          📱 Mobile Money
 
-    <select id="mobileMoneyNetwork">
-      <option value="MTN">MTN Mobile Money</option>
-      <option value="Telecel">Telecel Cash</option>
-    </select>
+        </label>
 
-    <div id="mobileMoneyDetails">
-      <strong>Send payment to:</strong>
 
-      <p>
-        <strong>Name:</strong>
-        ABDUL RAHMAN ABUBAKAR DEISHINI
-      </p>
+        <label class="payment-option">
 
-      <p>
-        <strong>Network:</strong> MTN
-      </p>
+          <input
+            type="radio"
+            name="paymentMethod"
+            value="paystack"
+          >
 
-      <p>
-        <strong>Number:</strong> 0551430109
-      </p>
+          💳 Paystack
 
-      <p>
-        Send the exact checkout amount, then enter your transaction/reference ID below.
-      </p>
-    </div>
+        </label>
 
-    <label for="mobileMoneyReference">
-      Transaction / Reference ID
-    </label>
 
-    <input
-      type="text"
-      id="mobileMoneyReference"
-      placeholder="Enter your MoMo transaction ID"
-    >
+        <!-- MOBILE MONEY -->
 
-  </div>
+        <div id="mobileMoneyPayment">
 
-</div>
+          <div class="form-group">
 
+            <label for="mobileMoneyNetwork">
+              Mobile Money Network
+            </label>
+
+            <select id="mobileMoneyNetwork">
+
+              <option value="telecel" selected>
+                Telecel Cash
+              </option>
+
+              <option value="mtn">
+                MTN Mobile Money
+              </option>
+
+            </select>
+
+          </div>
+
+
+          <div id="mobileMoneyDetails">
+
+            <strong>
+              Send payment to:
+            </strong>
+
+
+            <p>
+
+              <strong>
+                Name:
+              </strong>
+
+              <span id="momoRecipientName">
+                ABDUOL RAHMAN ABUBAKAR DEISHINI
+              </span>
+
+            </p>
+
+
+            <p>
+
+              <strong>
+                Network:
+              </strong>
+
+              <span id="momoRecipientNetwork">
+                Telecel
+              </span>
+
+            </p>
+
+
+            <p>
+
+              <strong>
+                Number:
+              </strong>
+
+              <span id="momoRecipientNumber">
+                0504768257
+              </span>
+
+            </p>
+
+
+            <p>
+              Send the exact checkout amount to the
+              selected number, then enter your
+              transaction/reference ID below.
+            </p>
+
+          </div>
+
+
+          <div class="form-group">
+
+            <label for="mobileMoneyReference">
+              Transaction / Reference ID
+            </label>
+
+            <input
+              type="text"
+              id="mobileMoneyReference"
+              placeholder="Enter your MoMo transaction ID"
+              autocomplete="off"
+            >
+
+          </div>
+
+        </div>
+
+      </div>
+
+
+      <!-- DELIVERY NAME -->
 
       <div class="form-group">
 
@@ -980,6 +984,8 @@
       </div>
 
 
+      <!-- DELIVERY PHONE -->
+
       <div class="form-group">
 
         <label for="deliveryPhone">
@@ -995,6 +1001,8 @@
 
       </div>
 
+
+      <!-- DELIVERY ADDRESS -->
 
       <div class="form-group">
 
@@ -1012,6 +1020,8 @@
       </div>
 
 
+      <!-- CITY -->
+
       <div class="form-group">
 
         <label for="deliveryCity">
@@ -1028,6 +1038,8 @@
       </div>
 
 
+      <!-- TOTAL -->
+
       <div class="checkout-total">
 
         <strong>
@@ -1041,12 +1053,14 @@
       </div>
 
 
+      <!-- PLACE ORDER -->
+
       <button
         id="placeOrderBtn"
         class="auth-submit"
         type="button"
       >
-        Pay with Paystack
+        Place Order
       </button>
 
     </div>
@@ -1056,10 +1070,7 @@
 
   <!-- ORDERS MODAL -->
 
-  <div
-    id="ordersModal"
-    class="modal"
-  >
+  <div id="ordersModal" class="modal">
 
     <div class="auth-box orders-box">
 
@@ -1090,10 +1101,7 @@
 
   <!-- PROFILE MODAL -->
 
-  <div
-    id="profileModal"
-    class="modal"
-  >
+  <div id="profileModal" class="modal">
 
     <div class="auth-box profile-box">
 
@@ -1172,10 +1180,7 @@
 
   <!-- CART MODAL -->
 
-  <div
-    id="cartModal"
-    class="modal"
-  >
+  <div id="cartModal" class="modal">
 
     <div class="auth-box cart-box">
 
@@ -1310,7 +1315,167 @@
   </footer>
 
 
-  <!-- JAVASCRIPT -->
+  <!-- MOBILE MONEY UI LOGIC -->
+
+  <script>
+
+    document.addEventListener(
+      'DOMContentLoaded',
+      function () {
+
+        const network =
+          document.getElementById(
+            'mobileMoneyNetwork'
+          );
+
+        const name =
+          document.getElementById(
+            'momoRecipientName'
+          );
+
+        const recipientNetwork =
+          document.getElementById(
+            'momoRecipientNetwork'
+          );
+
+        const number =
+          document.getElementById(
+            'momoRecipientNumber'
+          );
+
+        const mobileMoneyPayment =
+          document.getElementById(
+            'mobileMoneyPayment'
+          );
+
+        const placeOrderBtn =
+          document.getElementById(
+            'placeOrderBtn'
+          );
+
+        const paymentMethods =
+          document.querySelectorAll(
+            'input[name="paymentMethod"]'
+          );
+
+
+        function updateMobileMoneyDetails() {
+
+          if (!network) return;
+
+
+          if (
+            network.value === 'telecel'
+          ) {
+
+            name.textContent =
+              'ABDUOL RAHMAN ABUBAKAR DEISHINI';
+
+            recipientNetwork.textContent =
+              'Telecel';
+
+            number.textContent =
+              '0504768257';
+
+          }
+
+
+          else if (
+            network.value === 'mtn'
+          ) {
+
+            name.textContent =
+              'ABDUL RAHMAN ABUBAKAR DEISHINI';
+
+            recipientNetwork.textContent =
+              'MTN';
+
+            number.textContent =
+              '0551430109';
+
+          }
+
+        }
+
+
+        function updatePaymentMethod() {
+
+          const selected =
+            document.querySelector(
+              'input[name="paymentMethod"]:checked'
+            )?.value;
+
+
+          if (
+            selected === 'mobile_money'
+          ) {
+
+            if (mobileMoneyPayment) {
+              mobileMoneyPayment.style.display =
+                'block';
+            }
+
+            if (placeOrderBtn) {
+              placeOrderBtn.textContent =
+                'Place Order';
+            }
+
+          }
+
+
+          else {
+
+            if (mobileMoneyPayment) {
+              mobileMoneyPayment.style.display =
+                'none';
+            }
+
+            if (placeOrderBtn) {
+              placeOrderBtn.textContent =
+                'Pay with Paystack';
+            }
+
+          }
+
+        }
+
+
+        if (network) {
+
+          network.addEventListener(
+            'change',
+            updateMobileMoneyDetails
+          );
+
+        }
+
+
+        paymentMethods.forEach(
+          function (radio) {
+
+            radio.addEventListener(
+              'change',
+              updatePaymentMethod
+            );
+
+          }
+        );
+
+
+        // Default payment method:
+        // Mobile Money + Telecel
+
+        updateMobileMoneyDetails();
+
+        updatePaymentMethod();
+
+      }
+    );
+
+  </script>
+
+
+  <!-- APP JAVASCRIPT -->
 
   <script
     type="module"
