@@ -903,6 +903,68 @@
 
 
       <p id="checkoutMessage"></p>
+      <!-- MOBILE MONEY PAYMENT -->
+<div class="payment-method-section">
+
+  <h3>Payment Method</h3>
+
+  <label class="payment-option">
+    <input
+      type="radio"
+      name="paymentMethod"
+      value="mobile_money"
+      checked
+    >
+    📱 Mobile Money
+  </label>
+
+  <label class="payment-option">
+    <input
+      type="radio"
+      name="paymentMethod"
+      value="paystack"
+    >
+    💳 Paystack
+  </label>
+
+  <div id="mobileMoneyPayment">
+
+    <p><strong>Send payment to:</strong></p>
+
+    <select id="mobileMoneyNetwork">
+      <option value="telecel">Telecel Cash</option>
+      <option value="mtn">MTN Mobile Money</option>
+    </select>
+
+    <div id="mobileMoneyDetails">
+
+      <strong>Telecel Cash</strong><br>
+      ABDUOL RAHMAN ABUBAKAR DEISHINI<br>
+      <strong>0504768257</strong>
+
+    </div>
+
+    <p>
+      Send the exact order amount to the selected number.
+    </p>
+
+    <div class="form-group">
+
+      <label for="mobileMoneyReference">
+        Transaction / Reference ID
+      </label>
+
+      <input
+        type="text"
+        id="mobileMoneyReference"
+        placeholder="Enter your MoMo transaction ID"
+      >
+
+    </div>
+
+  </div>
+
+</div>
 
 
       <div class="form-group">
