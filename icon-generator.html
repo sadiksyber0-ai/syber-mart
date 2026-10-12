@@ -1,0 +1,108 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SYBER MART Icon Generator</title>
+<style>
+body {
+  font-family: Arial, sans-serif;
+  text-align: center;
+  padding: 20px;
+  background: #fff7ef;
+}
+canvas {
+  width: 220px;
+  max-width: 80%;
+  border-radius: 28px;
+}
+button {
+  display: block;
+  width: 100%;
+  padding: 16px;
+  margin: 12px 0;
+  border: 0;
+  border-radius: 10px;
+  background: #ff7900;
+  color: white;
+  font-size: 16px;
+}
+</style>
+</head>
+<body>
+<h1 style="color:#ff7900">SYBER MART</h1>
+<p>Your official shopping app icon</p>
+
+<canvas id="logo" width="512" height="512"></canvas>
+
+<button onclick="downloadIcon(192)">
+Download icon-192.png
+</button>
+<button onclick="downloadIcon(512)">
+Download icon-512.png
+</button>
+
+<script>
+const canvas = document.getElementById("logo");
+const ctx = canvas.getContext("2d");
+
+ctx.fillStyle = "#ff7900";
+ctx.fillRect(0, 0, 512, 512);
+
+// White shopping bag
+ctx.strokeStyle = "#ffffff";
+ctx.lineWidth = 20;
+ctx.lineJoin = "round";
+ctx.beginPath();
+ctx.moveTo(135, 205);
+ctx.lineTo(377, 205);
+ctx.lineTo(395, 390);
+ctx.lineTo(117, 390);
+ctx.closePath();
+ctx.stroke();
+
+// Bag handle
+ctx.beginPath();
+ctx.moveTo(200, 207);
+ctx.lineTo(200, 155);
+ctx.quadraticCurveTo(256, 95, 312, 155);
+ctx.lineTo(312, 207);
+ctx.stroke();
+
+// Letters
+ctx.fillStyle = "#ffffff";
+ctx.font = "bold 76px Arial";
+ctx.textAlign = "center";
+ctx.textBaseline = "middle";
+ctx.fillText("SM", 256, 310);
+
+function downloadIcon(size) {
+  const output = document.createElement("canvas");
+  output.width = size;
+  output.height = size;
+
+  output.getContext("2d").drawImage(
+    canvas, 0, 0, size, size
+  );
+
+  output.toBlob(function(blob) {
+    if (!blob) {
+      alert("Icon creation failed. Please try again.");
+      return;
+    }
+
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = "icon-" + size + ".png";
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+  }, "image/png");
+}
+</script>
+</body>
+</html>
