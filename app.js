@@ -2140,6 +2140,49 @@ loginBtn?.addEventListener(
   }
 );
 
+/* =========================================================
+   SHOW ADMIN DASHBOARD BUTTON FOR ADMINS ONLY
+========================================================= */
+
+async function updateAdminDashboardButton() {
+  const adminButton = document.getElementById('adminDashboardBtn');
+
+  if (!adminButton) return;
+
+  // Keep hidden until admin permission is confirmed
+  adminButton.style.display = 'none';
+
+  const { data: { user }, error: userError } =
+    await supabase.auth.getUser();
+
+  if (userError || !user) return;
+
+  const { data: profile, error: profileError } = await supabase
+    .from('profiles')
+    .select('role')
+    .eq('id', user.id)
+    .maybeSingle();
+
+  if (!profileError && profile?.role === 'admin') {
+    adminButton.style.display = 'inline-block';
+  }
+}
+
+// Open the admin dashboard when clicked
+document
+  .getElementById('adminDashboardBtn')
+  ?.addEventListener('click', () => {
+    window.location.href = 'admin.html';
+  });
+
+// Update the button when the page loads
+updateAdminDashboardButton();
+
+// Update it when the user logs in or out
+supabase.auth.onAuthStateChange(() => {
+  updateAdminDashboardButton();
+});
+
 
 /* =========================================================
    BECOME SELLER
