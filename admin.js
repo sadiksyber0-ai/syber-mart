@@ -1,5 +1,5 @@
 import { supabase } from './supabase.js';
-
+console.log('SYBER MART admin.js loaded');
 
 /* =========================================================
    ADMIN ELEMENTS
