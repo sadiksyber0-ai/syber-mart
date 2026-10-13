@@ -2092,96 +2092,151 @@ if (cancelEditBtn) {
 }
 
 
+
 /* =========================================================
-   OTHER BUTTONS
+   ADMIN MESSAGES
 ========================================================= */
 
-const messagesBtn =
-  document.getElementById(
-    'messagesBtn'
-  );
+const messagesBtn = document.getElementById('messagesBtn');
 
+async function openMessagesPanel() {
+  const { data: { user }, error: authError } =
+    await supabase.auth.getUser();
+
+  if (authError || !user) {
+    alert('Please sign in again.');
+    window.location.href = 'index.html';
+    return;
+  }
+
+  const { data: profile, error: profileError } = await supabase
+    .from('profiles')
+    .select('role')
+    .eq('id', user.id)
+    .maybeSingle();
+
+  if (profileError || profile?.role !== 'admin') {
+    alert('Access denied. Admins only.');
+    return;
+  }
+
+  const { data: messages, error } = await supabase
+    .from('messages')
+    .select('id, name, email, subject, message, status, created_at')
+    .order('created_at', { ascending: false });
+
+  if (error) {
+    console.error('Messages error:', error);
+    alert('Could not load messages. Check the messages table permissions.');
+    return;
+  }
+
+  const escapeHTML = value =>
+    String(value ?? '').replace(/[&<>"']/g, char => ({
+      '&': '&amp;',
+      '<': '&lt;',
+      '>': '&gt;',
+      '"': '&quot;',
+      "'": '&#39;'
+    })[char]);
+
+  let panel = document.getElementById('adminMessagesPanel');
+
+  if (!panel) {
+    panel = document.createElement('section');
+    panel.id = 'adminMessagesPanel';
+    panel.style.cssText =
+      'margin:20px 0;padding:20px;border:1px solid #ddd;' +
+      'border-radius:12px;background:#fff;color:#222;';
+
+    const dashboard = document.querySelector('main') ||
+      document.querySelector('.dashboard') ||
+      document.body;
+
+    dashboard.prepend(panel);
+  }
+
+  panel.innerHTML = `
+    <h2>Customer Messages</h2>
+    <p>Total messages: ${messages.length}</p>
+    <button id="refreshMessagesBtn" type="button">Refresh</button>
+    <div id="adminMessagesList"></div>
+  `;
+
+  const list = panel.querySelector('#adminMessagesList');
+
+  if (!messages.length) {
+    list.textContent = 'No customer messages yet.';
+    return;
+  }
+
+  messages.forEach(item => {
+    const card = document.createElement('article');
+    card.style.cssText =
+      'padding:14px;margin-top:12px;border:1px solid #ddd;' +
+      'border-radius:8px;overflow-wrap:anywhere;';
+
+    card.innerHTML = `
+      <h3>${escapeHTML(item.subject || 'No subject')}</h3>
+      <p><strong>From:</strong> ${escapeHTML(item.name || 'Customer')}</p>
+      <p><strong>Email:</strong> ${escapeHTML(item.email || 'Not provided')}</p>
+      <p><strong>Status:</strong> ${escapeHTML(item.status)}</p>
+      <p>${escapeHTML(item.message)}</p>
+      <p><small>${escapeHTML(
+        new Date(item.created_at).toLocaleString()
+      )}</small></p>
+      <button type="button" data-message-id="${escapeHTML(item.id)}">
+        Mark as read
+      </button>
+    `;
+
+    const markButton = card.querySelector('button');
+
+    markButton.addEventListener('click', async () => {
+      const { error: updateError } = await supabase
+        .from('messages')
+        .update({ status: 'read' })
+        .eq('id', item.id);
+
+      if (updateError) {
+        alert('Could not update message status.');
+        console.error(updateError);
+        return;
+      }
+
+      item.status = 'read';
+      card.querySelector('strong').textContent = 'From:';
+      card.querySelector('p:nth-of-type(3)').textContent = 'Status: read';
+      markButton.disabled = true;
+      markButton.textContent = 'Read';
+    });
+
+    list.appendChild(card);
+  });
+
+  panel.querySelector('#refreshMessagesBtn')
+    .addEventListener('click', openMessagesPanel);
+
+  panel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
 
 if (messagesBtn) {
-
-  messagesBtn.addEventListener(
-    'click',
-    () => {
-
-      alert(
-        'Messages panel coming next.'
-      );
-
-    }
-  );
-
+  messagesBtn.addEventListener('click', openMessagesPanel);
 }
 
+/* Other sections: to be connected next */
 
-const ordersBtn =
-  document.getElementById(
-    'ordersBtn'
-  );
+document.getElementById('ordersBtn')?.addEventListener('click', () => {
+  alert('Next: connect Order Management.');
+});
 
+document.getElementById('customersBtn')?.addEventListener('click', () => {
+  alert('Next: connect Customer Management.');
+});
 
-if (ordersBtn) {
-
-  ordersBtn.addEventListener(
-    'click',
-    () => {
-
-      alert(
-        'Order management coming next.'
-      );
-
-    }
-  );
-
-}
-
-
-const customersBtn =
-  document.getElementById(
-    'customersBtn'
-  );
-
-
-if (customersBtn) {
-
-  customersBtn.addEventListener(
-    'click',
-    () => {
-
-      alert(
-        'Customer management coming next.'
-      );
-
-    }
-  );
-
-}
-
-
-const sellersBtn =
-  document.getElementById(
-    'sellersBtn'
-  );
-
-
-if (sellersBtn) {
-
-  sellersBtn.addEventListener(
-    'click',
-    () => {
-
-      alert(
-        'Seller management coming next.'
-      );
-
-    }
-  );
-
-}
+document.getElementById('sellersBtn')?.addEventListener('click', () => {
+  alert('Next: connect Seller Management.');
+});
 
 
 /* =========================================================
