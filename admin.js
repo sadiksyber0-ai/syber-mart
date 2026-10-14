@@ -2219,9 +2219,12 @@ async function openMessagesPanel() {
   panel.scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
-if (messagesBtn) {
-  messagesBtn.addEventListener('click', openMessagesPanel);
-}
+
+messagesBtn.addEventListener('click', () => {
+  alert('Messages button click detected!');
+  openMessagesPanel();
+});
+
 
 /* Other sections: to be connected next */
 
