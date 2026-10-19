@@ -339,61 +339,67 @@ function setupAddProductImagePicker() {
    ADMIN CHECK
 ========================================================= */
 
+
 async function checkAdmin() {
+  try {
+    const {
+      data: { user },
+      error
+    } = await supabase.auth.getUser();
 
-  const {
-    data: { user },
-    error
-  } = await supabase.auth.getUser();
+    if (error) {
+      console.error('Admin authentication error:', error);
+      alert('Could not verify your login: ' + error.message);
+      return null;
+    }
 
+    if (!user) {
+      alert('You are not logged in. Please log in again.');
+      window.location.href = 'index.html';
+      return null;
+    }
 
-  if (error || !user) {
+    const {
+      data: profile,
+      error: profileError
+    } = await supabase
+      .from('profiles')
+      .select('role, full_name')
+      .eq('id', user.id)
+      .maybeSingle();
 
-    window.location.href =
-      'index.html';
+    if (profileError) {
+      console.error('Admin profile query error:', profileError);
+      alert('Could not load your admin profile: ' + profileError.message);
+      return null;
+    }
 
+    if (!profile) {
+      alert('No profile was found for this account.');
+      window.location.href = 'index.html';
+      return null;
+    }
+
+    if (profile.role !== 'admin') {
+      alert('Access denied. This account is not an admin.');
+      window.location.href = 'index.html';
+      return null;
+    }
+
+    if (adminEmail) {
+      adminEmail.textContent = user.email || '';
+    }
+
+    console.log('Admin check successful:', profile.full_name);
+    return user;
+
+  } catch (error) {
+    console.error('Unexpected admin check error:', error);
+    alert('Admin dashboard error: ' + error.message);
     return null;
-
   }
-
-
-  const {
-    data: profile,
-    error: profileError
-  } = await supabase
-    .from('profiles')
-    .select('role, full_name')
-    .eq('id', user.id)
-    .single();
-
-
-  if (
-    profileError ||
-    !profile ||
-    profile.role !== 'admin'
-  ) {
-
-    alert(
-      'Access denied. Admins only.'
-    );
-
-    window.location.href =
-      'index.html';
-
-    return null;
-
-  }
-
-
-  if (adminEmail) {
-    adminEmail.textContent =
-      user.email;
-  }
-
-
-  return user;
-
 }
+
 
 
 /* =========================================================
