@@ -406,79 +406,59 @@ async function checkAdmin() {
    LOAD DASHBOARD
 ========================================================= */
 
+
 async function loadDashboard() {
+  const loadingMessage = document.getElementById('loadingMessage');
 
-  const user =
-    await checkAdmin();
+  try {
+    console.log('Admin dashboard: starting');
 
-  if (!user) {
-    return;
+    const user = await checkAdmin();
+
+    if (!user) {
+      console.log('Admin dashboard: admin check did not pass');
+      return;
+    }
+
+    console.log('Admin dashboard: admin verified');
+
+    const results = await Promise.all([
+      supabase.from('products').select('*', { count: 'exact', head: true }),
+      supabase.from('orders').select('*', { count: 'exact', head: true }),
+      supabase.from('profiles').select('*', { count: 'exact', head: true }).eq('role', 'customer'),
+      supabase.from('profiles').select('*', { count: 'exact', head: true }).eq('role', 'seller')
+    ]);
+
+    const labels = ['Products', 'Orders', 'Customers', 'Sellers'];
+
+    for (let i = 0; i < results.length; i++) {
+      if (results[i].error) {
+        console.error(labels[i] + ' count error:', results[i].error);
+        throw new Error(labels[i] + ': ' + results[i].error.message);
+      }
+    }
+
+    if (productCount) productCount.textContent = results[0].count ?? 0;
+    if (orderCount) orderCount.textContent = results[1].count ?? 0;
+    if (customerCount) customerCount.textContent = results[2].count ?? 0;
+    if (sellerCount) sellerCount.textContent = results[3].count ?? 0;
+
+    console.log('Admin dashboard: counts loaded');
+
+    await loadCategories();
+
+    if (loadingMessage) loadingMessage.textContent = 'Dashboard loaded';
+    console.log('Admin dashboard: fully loaded');
+
+  } catch (error) {
+    console.error('Dashboard loading failed:', error);
+
+    if (loadingMessage) {
+      loadingMessage.textContent = 'Dashboard error: ' + error.message;
+    }
+
+    alert('Dashboard loading failed: ' + error.message);
   }
-
-
-  const {
-    count: products
-  } = await supabase
-    .from('products')
-    .select('*', {
-      count: 'exact',
-      head: true
-    });
-
-
-  const {
-    count: orders
-  } = await supabase
-    .from('orders')
-    .select('*', {
-      count: 'exact',
-      head: true
-    });
-
-
-  const {
-    count: customers
-  } = await supabase
-    .from('profiles')
-    .select('*', {
-      count: 'exact',
-      head: true
-    })
-    .eq(
-      'role',
-      'customer'
-    );
-
-
-  const {
-    count: sellers
-  } = await supabase
-    .from('profiles')
-    .select('*', {
-      count: 'exact',
-      head: true
-    })
-    .eq(
-      'role',
-      'seller'
-    );
-
-
-  productCount.textContent =
-    products ?? 0;
-
-  orderCount.textContent =
-    orders ?? 0;
-
-  customerCount.textContent =
-    customers ?? 0;
-
-  sellerCount.textContent =
-    sellers ?? 0;
-
-
-  await loadCategories();
-
 }
 
 
