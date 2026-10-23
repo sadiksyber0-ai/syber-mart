@@ -1,0 +1,82 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Messages | SYBER MART</title>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    .messaging-page {
+      max-width: 800px;
+      margin: 30px auto;
+      padding: 20px;
+    }
+    .message-box {
+      border: 1px solid #ddd;
+      border-radius: 12px;
+      padding: 16px;
+      margin: 12px 0;
+      overflow-wrap: anywhere;
+    }
+    #conversationMessages {
+      max-height: 50vh;
+      overflow-y: auto;
+    }
+    #messageInput {
+      box-sizing: border-box;
+      width: 100%;
+      min-height: 90px;
+      padding: 12px;
+      margin: 12px 0;
+    }
+    .message-actions {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+  </style>
+</head>
+<body>
+  <main class="messaging-page">
+    <h1>SYBER MART Messages</h1>
+    <p id="messageStatus">Checking your account...</p>
+
+    <section class="message-box">
+      <h2>Start a conversation</h2>
+      <label for="productId">Product ID</label>
+      <input id="productId" type="number" min="1"
+        placeholder="Enter the product ID">
+
+      <label for="sellerId">Seller account ID</label>
+      <input id="sellerId" type="text"
+        placeholder="Seller UUID">
+
+      <button id="startConversationBtn" type="button">
+        Open Conversation
+      </button>
+    </section>
+
+    <section class="message-box">
+      <h2>Your conversation</h2>
+      <div id="conversationMessages"></div>
+
+      <label for="messageInput">Your message</label>
+      <textarea id="messageInput"
+        maxlength="3000"
+        placeholder="Write your message..."></textarea>
+
+      <div class="message-actions">
+        <button id="sendMessageBtn" type="button">
+          Send Message
+        </button>
+        <button id="refreshMessagesBtn" type="button">
+          Refresh
+        </button>
+      </div>
+    </section>
+  </main>
+
+  <script type="module" src="messages.js"></script>
+</body>
+</html>
