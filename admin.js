@@ -2206,10 +2206,16 @@ async function openMessagesPanel() {
 }
 
 
-messagesBtn.addEventListener('click', () => {
-  alert('Messages button click detected!');
-  openMessagesPanel();
-});
+if (messagesBtn) {
+  messagesBtn.addEventListener('click', async () => {
+    try {
+      await openMessagesPanel();
+    } catch (error) {
+      console.error('Messages panel error:', error);
+      alert('Unable to open messages: ' + error.message);
+    }
+  });
+}
 
 
 /* Other sections: to be connected next */
