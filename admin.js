@@ -2078,6 +2078,7 @@ if (cancelEditBtn) {
 }
 
 
+
 /* =========================================================
    ADMIN MESSAGES
 ========================================================= */
@@ -2107,12 +2108,14 @@ async function openMessagesPanel() {
 
   const { data: messages, error } = await supabase
     .from('messages')
-    .select('id, name, email, subject, message, status, created_at')
+    .select(
+      'id, user_id, name, email, subject, message, status, admin_reply, created_at, reply_at'
+    )
     .order('created_at', { ascending: false });
 
   if (error) {
     console.error('Messages error:', error);
-    alert('Could not load messages. Check the messages table permissions.');
+    alert('Could not load messages: ' + error.message);
     return;
   }
 
@@ -2144,7 +2147,7 @@ async function openMessagesPanel() {
   panel.innerHTML = `
     <h2>Customer Messages</h2>
     <p>Total messages: ${messages.length}</p>
-    <button id="refreshMessagesBtn" type="button">Refresh</button>
+    <button id="refreshMessagesBtn" type="button">Refresh Messages</button>
     <div id="adminMessagesList"></div>
   `;
 
@@ -2152,11 +2155,11 @@ async function openMessagesPanel() {
 
   if (!messages.length) {
     list.textContent = 'No customer messages yet.';
-    return;
   }
 
   messages.forEach(item => {
     const card = document.createElement('article');
+
     card.style.cssText =
       'padding:14px;margin-top:12px;border:1px solid #ddd;' +
       'border-radius:8px;overflow-wrap:anywhere;';
@@ -2165,35 +2168,70 @@ async function openMessagesPanel() {
       <h3>${escapeHTML(item.subject || 'No subject')}</h3>
       <p><strong>From:</strong> ${escapeHTML(item.name || 'Customer')}</p>
       <p><strong>Email:</strong> ${escapeHTML(item.email || 'Not provided')}</p>
-      <p><strong>Status:</strong> ${escapeHTML(item.status)}</p>
-      <p>${escapeHTML(item.message)}</p>
-      <p><small>${escapeHTML(
-        new Date(item.created_at).toLocaleString()
-      )}</small></p>
-      <button type="button" data-message-id="${escapeHTML(item.id)}">
-        Mark as read
+      <p><strong>Status:</strong> ${escapeHTML(item.status || 'new')}</p>
+      <p><strong>Message:</strong><br>${escapeHTML(item.message || '')}</p>
+      <p><strong>Received:</strong> ${escapeHTML(
+        item.created_at
+          ? new Date(item.created_at).toLocaleString()
+          : 'Unknown'
+      )}</p>
+      <hr>
+      <label>Reply to customer</label>
+      <textarea
+        class="adminReplyInput"
+        rows="4"
+        style="width:100%;box-sizing:border-box;margin:8px 0;padding:10px;"
+        placeholder="Type your reply here..."
+      >${escapeHTML(item.admin_reply || '')}</textarea>
+      <button class="sendReplyBtn" type="button">
+        Save Reply
       </button>
+      <p class="replyMessage" role="status"></p>
+      ${
+        item.reply_at
+          ? `<p><small>Last reply: ${escapeHTML(
+              new Date(item.reply_at).toLocaleString()
+            )}</small></p>`
+          : ''
+      }
     `;
 
-    const markButton = card.querySelector('button');
+    const replyInput = card.querySelector('.adminReplyInput');
+    const saveButton = card.querySelector('.sendReplyBtn');
+    const replyMessage = card.querySelector('.replyMessage');
 
-    markButton.addEventListener('click', async () => {
-      const { error: updateError } = await supabase
-        .from('messages')
-        .update({ status: 'read' })
-        .eq('id', item.id);
+    saveButton.addEventListener('click', async () => {
+      const reply = replyInput.value.trim();
 
-      if (updateError) {
-        alert('Could not update message status.');
-        console.error(updateError);
+      if (!reply) {
+        alert('Please type a reply before saving.');
         return;
       }
 
-      item.status = 'read';
-      card.querySelector('strong').textContent = 'From:';
-      card.querySelector('p:nth-of-type(3)').textContent = 'Status: read';
-      markButton.disabled = true;
-      markButton.textContent = 'Read';
+      saveButton.disabled = true;
+      saveButton.textContent = 'Saving...';
+      replyMessage.textContent = '';
+
+      const { error: updateError } = await supabase
+        .from('messages')
+        .update({
+          admin_reply: reply,
+          reply_at: new Date().toISOString(),
+          status: 'replied'
+        })
+        .eq('id', item.id);
+
+      if (updateError) {
+        console.error('Reply error:', updateError);
+        replyMessage.textContent =
+          'Could not save reply: ' + updateError.message;
+        saveButton.disabled = false;
+        saveButton.textContent = 'Save Reply';
+        return;
+      }
+
+      replyMessage.textContent = 'Reply saved successfully.';
+      saveButton.textContent = 'Reply Saved';
     });
 
     list.appendChild(card);
@@ -2204,7 +2242,6 @@ async function openMessagesPanel() {
 
   panel.scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
-
 
 if (messagesBtn) {
   messagesBtn.addEventListener('click', async () => {
