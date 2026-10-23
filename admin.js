@@ -2109,7 +2109,7 @@ async function openMessagesPanel() {
   const { data: messages, error } = await supabase
     .from('messages')
     .select(
-      'id, user_id, name, email, subject, message, status, admin_reply, created_at, reply_at'
+      'id, user_id, name, email, subject, message, status, admin_reply, created_at, replied_at'
     )
     .order('created_at', { ascending: false });
 
@@ -2188,9 +2188,9 @@ async function openMessagesPanel() {
       </button>
       <p class="replyMessage" role="status"></p>
       ${
-        item.reply_at
+        item.replied_at
           ? `<p><small>Last reply: ${escapeHTML(
-              new Date(item.reply_at).toLocaleString()
+              new Date(item.replied_at).toLocaleString()
             )}</small></p>`
           : ''
       }
@@ -2216,7 +2216,7 @@ async function openMessagesPanel() {
         .from('messages')
         .update({
           admin_reply: reply,
-          reply_at: new Date().toISOString(),
+          replied_at: new Date().toISOString(),
           status: 'replied'
         })
         .eq('id', item.id);
