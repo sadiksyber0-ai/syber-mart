@@ -3326,3 +3326,151 @@ footer {
 .no-scroll {
   overflow: hidden !important;
 }
+
+/* =========================================================
+   SYBER MART - MY ORDERS
+========================================================= */
+
+.my-orders-tabs {
+  display: flex;
+  gap: 0;
+  margin: 16px 0;
+  border-bottom: 1px solid #ddd;
+}
+
+.my-orders-tabs button {
+  flex: 1;
+  padding: 14px 8px;
+  border: 0;
+  border-bottom: 3px solid transparent;
+  background: transparent;
+  color: #444;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.my-orders-tabs button.active {
+  color: #ff7900;
+  border-bottom-color: #ff7900;
+}
+
+.my-orders-cards {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.my-order-card {
+  padding: 16px;
+  border: 1px solid #e2e2e2;
+  border-radius: 12px;
+  background: #fff;
+  color: #333;
+  overflow-wrap: anywhere;
+}
+
+.my-order-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  padding-bottom: 12px;
+  margin-bottom: 12px;
+  border-bottom: 1px solid #eee;
+}
+
+.my-order-heading span {
+  color: #888;
+  font-size: 13px;
+  white-space: nowrap;
+}
+
+.my-order-products {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.my-order-product {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.my-order-product-image,
+.my-order-no-image {
+  width: 88px;
+  height: 88px;
+  flex: 0 0 88px;
+  object-fit: contain;
+  border-radius: 8px;
+  background: #f7f7f7;
+}
+
+.my-order-no-image {
+  display: grid;
+  place-items: center;
+  font-size: 30px;
+}
+
+.my-order-product-info {
+  min-width: 0;
+}
+
+.my-order-product-info strong {
+  display: block;
+  font-size: 14px;
+  line-height: 1.4;
+}
+
+.my-order-product-info p,
+.my-order-summary p {
+  margin: 7px 0;
+  font-size: 14px;
+}
+
+.my-order-summary {
+  margin-top: 14px;
+  padding-top: 10px;
+  border-top: 1px solid #eee;
+}
+
+.my-order-status {
+  display: inline-block;
+  padding: 4px 8px;
+  border-radius: 5px;
+  font-size: 12px;
+  font-weight: 700;
+  background: #fff0d9;
+  color: #925000;
+}
+
+.my-order-status.delivered {
+  background: #dff3d6;
+  color: #287a1b;
+}
+
+.my-order-status.canceled {
+  background: #ffe1e1;
+  color: #a52222;
+}
+
+@media (max-width: 420px) {
+  .my-order-card {
+    padding: 12px;
+  }
+
+  .my-order-heading {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 5px;
+  }
+
+  .my-order-product-image,
+  .my-order-no-image {
+    width: 72px;
+    height: 72px;
+    flex-basis: 72px;
+  }
+}
