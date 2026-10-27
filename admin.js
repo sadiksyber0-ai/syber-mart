@@ -2257,9 +2257,182 @@ if (messagesBtn) {
 
 /* Other sections: to be connected next */
 
-document.getElementById('ordersBtn')?.addEventListener('click', () => {
-  alert('Next: connect Order Management.');
-});
+
+/* =========================================================
+   ADMIN ORDER MANAGEMENT
+========================================================= */
+
+const ordersBtn = document.getElementById('ordersBtn');
+
+async function openOrdersPanel() {
+  const { data: { user }, error: authError } =
+    await supabase.auth.getUser();
+
+  if (authError || !user) {
+    alert('Please sign in again.');
+    window.location.href = 'index.html';
+    return;
+  }
+
+  const { data: profile, error: profileError } = await supabase
+    .from('profiles')
+    .select('role')
+    .eq('id', user.id)
+    .maybeSingle();
+
+  if (profileError || profile?.role !== 'admin') {
+    alert('Access denied. Admins only.');
+    return;
+  }
+
+  const { data: orders, error } = await supabase
+    .from('orders')
+    .select(`
+      id,
+      user_id,
+      total_amount,
+      status,
+      payment_status,
+      payment_method,
+      delivery_name,
+      delivery_phone,
+      delivery_address,
+      delivery_city,
+      created_at,
+      updated_at,
+      payment_reference,
+      paid_at,
+      order_number
+    `)
+    .order('created_at', { ascending: false });
+
+  if (error) {
+    console.error('Orders error:', error);
+    alert('Could not load orders: ' + error.message);
+    return;
+  }
+
+  let panel = document.getElementById('adminOrdersPanel');
+
+  if (!panel) {
+    panel = document.createElement('section');
+    panel.id = 'adminOrdersPanel';
+    panel.style.cssText =
+      'margin:20px 0;padding:20px;border:1px solid #ddd;' +
+      'border-radius:12px;background:#fff;color:#222;';
+
+    const dashboard = document.querySelector('main') ||
+      document.querySelector('.dashboard') ||
+      document.body;
+
+    dashboard.prepend(panel);
+  }
+
+  panel.innerHTML = `
+    <h2>Order Management</h2>
+    <p>Total orders: ${orders.length}</p>
+    <button id="refreshOrdersBtn" type="button">
+      Refresh Orders
+    </button>
+    <div id="adminOrdersList"></div>
+  `;
+
+  const list = panel.querySelector('#adminOrdersList');
+
+  const safe = value => String(value ?? '').replace(/[&<>"']/g, c => ({
+    '&': '&amp;',
+    '<': '&lt;',
+    '>': '&gt;',
+    '"': '&quot;',
+    "'": '&#39;'
+  })[c]);
+
+  if (!orders.length) {
+    list.textContent = 'No orders found.';
+  }
+
+  orders.forEach(order => {
+    const card = document.createElement('article');
+    card.style.cssText =
+      'padding:14px;margin-top:14px;border:1px solid #ddd;' +
+      'border-radius:10px;overflow-wrap:anywhere;';
+
+    card.innerHTML = `
+      <h3>Order ${safe(order.order_number || order.id)}</h3>
+      <p><strong>Amount:</strong> GH₵${safe(order.total_amount)}</p>
+      <p><strong>Order status:</strong> ${safe(order.status || 'pending')}</p>
+      <p><strong>Payment:</strong> ${safe(order.payment_method || 'Not specified')}</p>
+      <p><strong>Payment status:</strong> ${safe(order.payment_status || 'Unknown')}</p>
+      <p><strong>Customer ID:</strong> ${safe(order.user_id)}</p>
+      <p><strong>Delivery name:</strong> ${safe(order.delivery_name || 'Not provided')}</p>
+      <p><strong>Phone:</strong> ${safe(order.delivery_phone || 'Not provided')}</p>
+      <p><strong>Address:</strong> ${safe(order.delivery_address || 'Not provided')}</p>
+      <p><strong>City:</strong> ${safe(order.delivery_city || 'Not provided')}</p>
+      <p><strong>Placed:</strong> ${safe(
+        order.created_at ? new Date(order.created_at).toLocaleString() : 'Unknown'
+      )}</p>
+      <label>Update order status</label>
+      <select class="orderStatusSelect">
+        ${['pending', 'processing', 'shipped', 'completed', 'cancelled']
+          .map(s => `<option value="${s}" ${order.status === s ? 'selected' : ''}>${s}</option>`)
+          .join('')}
+      </select>
+      <button class="saveOrderStatusBtn" type="button">
+        Save Status
+      </button>
+      <p class="orderUpdateMessage" role="status"></p>
+    `;
+
+    const select = card.querySelector('.orderStatusSelect');
+    const saveBtn = card.querySelector('.saveOrderStatusBtn');
+    const message = card.querySelector('.orderUpdateMessage');
+
+    saveBtn.addEventListener('click', async () => {
+      const newStatus = select.value;
+
+      saveBtn.disabled = true;
+      message.textContent = 'Saving...';
+
+      const { error: updateError } = await supabase
+        .from('orders')
+        .update({
+          status: newStatus,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', order.id);
+
+      if (updateError) {
+        console.error('Order update error:', updateError);
+        message.textContent = 'Could not update: ' + updateError.message;
+        saveBtn.disabled = false;
+        return;
+      }
+
+      order.status = newStatus;
+      message.textContent = 'Order status updated.';
+      saveBtn.disabled = false;
+    });
+
+    list.appendChild(card);
+  });
+
+  panel.querySelector('#refreshOrdersBtn')
+    .addEventListener('click', openOrdersPanel);
+
+  panel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+if (ordersBtn) {
+  ordersBtn.addEventListener('click', async () => {
+    try {
+      await openOrdersPanel();
+    } catch (error) {
+      console.error('Orders panel error:', error);
+      alert('Unable to open orders: ' + error.message);
+    }
+  });
+}
+
 
 document.getElementById('customersBtn')?.addEventListener('click', () => {
   alert('Next: connect Customer Management.');
