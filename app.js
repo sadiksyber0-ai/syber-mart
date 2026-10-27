@@ -3112,187 +3112,141 @@ closeOrders?.addEventListener(
 
 
 /* =========================================================
-   LOAD ORDERS - SYBER MART
+   LOAD ORDERS
 ========================================================= */
 
 async function loadOrders() {
+
   if (!ordersList) return;
 
-  ordersList.innerHTML = '<p>Loading orders...</p>';
+  ordersList.innerHTML =
+    '<p>Loading orders...</p>';
 
   const {
-    data: { user },
-    error: authError
+    data: { user }
   } = await supabase.auth.getUser();
 
-  if (authError || !user) {
+  if (!user) {
+
     ordersList.innerHTML =
       '<p>Please log in to view your orders.</p>';
+
     return;
+
   }
 
-  const { data: orders, error } = await supabase
+  const {
+    data: orders,
+    error
+  } = await supabase
     .from('orders')
-    .select(`
-      id,
-      user_id,
-      order_number,
-      total_amount,
-      status,
-      payment_status,
-      payment_method,
-      created_at,
-      order_items (
-        id,
-        product_id,
-        product_name,
-        quantity,
-        unit_price,
-        products (
-          image_url
-        )
-      )
-    `)
+    .select('*')
     .eq('user_id', user.id)
-    .order('created_at', { ascending: false });
+    .order('created_at', {
+      ascending: false
+    });
 
   if (error) {
-    console.error('Orders error:', error);
+
+    console.error(
+      'Orders error:',
+      error
+    );
+
     ordersList.innerHTML =
-      '<p>Unable to load your orders: ' +
-      escapeHtml(error.message) + '</p>';
+      '<p>Unable to load your orders.</p>';
+
     return;
+
   }
 
-  if (!orders || orders.length === 0) {
+  if (
+    !orders ||
+    orders.length === 0
+  ) {
+
     ordersList.innerHTML = `
+
       <div class="empty-orders">
-        <p>📦 You have no orders yet.</p>
-        <p>Your orders will appear here after checkout.</p>
+
+        <p>
+          📦 You have no orders yet.
+        </p>
+
+        <p>
+          Your orders will appear here after checkout.
+        </p>
+
       </div>
+
     `;
+
     return;
+
   }
 
-  const safe = value => escapeHtml(String(value ?? ''));
+  ordersList.innerHTML =
+    '';
 
-  const money = value =>
-    'GH₵ ' + numberValue(value).toFixed(2);
+  orders.forEach(
+    order => {
 
-  const statusLabel = value =>
-    String(value || 'pending')
-      .replace(/[_-]/g, ' ')
-      .replace(/\b\w/g, c => c.toUpperCase());
+      const date =
+        new Date(
+          order.created_at
+        ).toLocaleDateString();
 
-  const isCanceled = status =>
-    /cancel|return|refund/i.test(status || '');
+      ordersList.innerHTML += `
 
-  const isDelivered = status =>
-    /deliver|complete/i.test(status || '');
+        <div class="order-card">
 
-  let activeTab = 'ongoing';
+          <div class="order-header">
 
-  function renderOrders() {
-    const visibleOrders = orders.filter(order => {
-      if (activeTab === 'canceled') {
-        return isCanceled(order.status);
-      }
-      return !isCanceled(order.status);
-    });
+            <strong>
+              Order #${escapeHtml(
+                order.order_number ||
+                order.id
+              )}
+            </strong>
 
-    ordersList.innerHTML = `
-      <div class="my-orders-tabs">
-        <button type="button"
-          class="${activeTab === 'ongoing' ? 'active' : ''}"
-          data-orders-tab="ongoing">
-          Ongoing/Delivered
-        </button>
-        <button type="button"
-          class="${activeTab === 'canceled' ? 'active' : ''}"
-          data-orders-tab="canceled">
-          Canceled/Returned
-        </button>
-      </div>
+            <span>
+              ${escapeHtml(date)}
+            </span>
 
-      <div class="my-orders-cards">
-        ${visibleOrders.length ? visibleOrders.map(order => {
-          const date = order.created_at
-            ? new Date(order.created_at).toLocaleDateString()
-            : '';
+          </div>
 
-          const items = order.order_items || [];
+          <div class="order-details">
 
-          const itemCards = items.length
-            ? items.map(item => {
-                const image = item.products?.image_url || '';
-                const imageMarkup = image
-                  ? `<img src="${safe(image)}"
-                       alt="${safe(item.product_name)}"
-                       loading="lazy"
-                       class="my-order-product-image">`
-                  : `<div class="my-order-no-image">📦</div>`;
+            <p>
+              <strong>Total:</strong>
+              GH₵ ${numberValue(
+                order.total_amount
+              ).toFixed(2)}
+            </p>
 
-                return `
-                  <div class="my-order-product">
-                    ${imageMarkup}
-                    <div class="my-order-product-info">
-                      <strong>${safe(item.product_name || 'Product')}</strong>
-                      <p>Quantity: ${safe(item.quantity)}</p>
-                      <p>Unit price: ${money(item.unit_price)}</p>
-                    </div>
-                  </div>
-                `;
-              }).join('')
-            : '<p>Product details are unavailable.</p>';
+            <p>
+              <strong>Payment:</strong>
+              ${escapeHtml(
+                order.payment_status
+              )}
+            </p>
 
-          const canceled = isCanceled(order.status);
-          const delivered = isDelivered(order.status);
+            <p>
+              <strong>Status:</strong>
+              ${escapeHtml(
+                order.status
+              )}
+            </p>
 
-          const badgeClass = canceled
-            ? 'canceled'
-            : delivered
-              ? 'delivered'
-              : 'ongoing';
+          </div>
 
-          return `
-            <article class="my-order-card">
-              <div class="my-order-heading">
-                <strong>Order #${safe(order.order_number || order.id)}</strong>
-                <span>${safe(date)}</span>
-              </div>
+        </div>
 
-              <div class="my-order-products">
-                ${itemCards}
-              </div>
+      `;
 
-              <div class="my-order-summary">
-                <p><strong>Total:</strong> ${money(order.total_amount)}</p>
-                <p><strong>Payment:</strong> ${safe(statusLabel(order.payment_status))}</p>
-                <p>
-                  <strong>Status:</strong>
-                  <span class="my-order-status ${badgeClass}">
-                    ${safe(statusLabel(order.status))}
-                  </span>
-                </p>
-                <p><strong>Payment method:</strong> ${safe(order.payment_method || 'Not specified')}</p>
-              </div>
-            </article>
-          `;
-        }).join('') : '<p class="empty-orders">No orders in this section.</p>'}
-      </div>
-    `;
+    }
+  );
 
-    ordersList.querySelectorAll('[data-orders-tab]').forEach(button => {
-      button.addEventListener('click', () => {
-        activeTab = button.dataset.ordersTab;
-        renderOrders();
-      });
-    });
-  }
-
-  renderOrders();
-}
-    updateProductDetailsWishlistButton();
 }
 
 
