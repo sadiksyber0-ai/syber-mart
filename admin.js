@@ -2371,12 +2371,14 @@ async function openOrdersPanel() {
       <p><strong>Placed:</strong> ${safe(
         order.created_at ? new Date(order.created_at).toLocaleString() : 'Unknown'
       )}</p>
-      <label>Update order status</label>
-      <select class="orderStatusSelect">
-        ${['pending', 'processing', 'shipped', 'completed', 'cancelled']
-          .map(s => `<option value="${s}" ${order.status === s ? 'selected' : ''}>${s}</option>`)
-          .join('')}
-      </select>
+    
+<label>Update order status</label>
+<select class="orderStatusSelect">
+  ${['pending', 'processing', 'shipped', 'available_for_pickup', 'Delivered', 'cancelled']
+    .map(s => `<option value="${s}" ${order.status === s ? 'selected' : ''}>${s === 'available_for_pickup' ? 'Available for Pickup' : s.charAt(0).toUpperCase() + s.slice(1)}</option>`)
+    .join('')}
+</select>
+
       <button class="saveOrderStatusBtn" type="button">
         Save Status
       </button>
