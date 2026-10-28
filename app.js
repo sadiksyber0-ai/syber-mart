@@ -5683,7 +5683,7 @@ async function handlePaystackCallback() {
         `Payment successful! 🎉\n\nYour SYBER MART order #${
           data.order_number ||
           data.order_id
-        } has been Shipped.`
+        } has been confirmed.`
       );
 
 
