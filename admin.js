@@ -2302,7 +2302,17 @@ async function openOrdersPanel() {
       updated_at,
       payment_reference,
       paid_at,
-      order_number
+            order_number,
+      order_items (
+        id,
+        product_id,
+        product_name,
+        quantity,
+        unit_price,
+        products (
+          image_url
+        )
+      )
     `)
     .order('created_at', { ascending: false });
 
@@ -2357,9 +2367,53 @@ async function openOrdersPanel() {
       'padding:14px;margin-top:14px;border:1px solid #ddd;' +
       'border-radius:10px;overflow-wrap:anywhere;';
 
+        const items = order.order_items || [];
+
+    const itemsHTML = items.length
+      ? items.map(item => {
+          const image = item.products?.image_url || '';
+
+          const imageHTML = image
+            ? `<img
+                src="${safe(image)}"
+                alt="${safe(item.product_name)}"
+                style="width:75px;height:75px;object-fit:cover;border-radius:8px;"
+                onerror="this.style.display='none';"
+              >`
+            : '<div style="font-size:35px;">📦</div>';
+
+          const quantity = Number(item.quantity) || 0;
+          const price = Number(item.unit_price) || 0;
+
+          return `
+            <div style="
+              display:flex;
+              align-items:center;
+              gap:12px;
+              padding:12px;
+              margin:10px 0;
+              border:1px solid #eee;
+              border-radius:8px;
+            ">
+              ${imageHTML}
+
+              <div style="flex:1;min-width:0;">
+                <strong>${safe(item.product_name || 'Product')}</strong>
+                <p>Quantity: ${quantity}</p>
+                <p>Unit price: GH₵${price.toFixed(2)}</p>
+                <strong>Subtotal: GH₵${(quantity * price).toFixed(2)}</strong>
+              </div>
+            </div>
+          `;
+        }).join('')
+      : '<p>Product details are unavailable for this order.</p>';
     card.innerHTML = `
       <h3>Order ${safe(order.order_number || order.id)}</h3>
       <p><strong>Amount:</strong> GH₵${safe(order.total_amount)}</p>
+            <h4>Items Ordered</h4>
+      <div class="admin-order-items">
+        ${itemsHTML}
+      </div>
       <p><strong>Order status:</strong> ${safe(order.status || 'pending')}</p>
       <p><strong>Payment:</strong> ${safe(order.payment_method || 'Not specified')}</p>
       <p><strong>Payment status:</strong> ${safe(order.payment_status || 'Unknown')}</p>
