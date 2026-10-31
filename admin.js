@@ -2449,13 +2449,15 @@ async function openOrdersPanel() {
       saveBtn.disabled = true;
       message.textContent = 'Saving...';
 
-      const { error: updateError } = await supabase
-        .from('orders')
-        .update({
-          status: newStatus,
-          updated_at: new Date().toISOString()
-        })
-        .eq('id', order.id);
+      const { data: updatedOrder, error: updateError } = await supabase
+  .from('orders')
+  .update({
+    status: newStatus,
+    updated_at: new Date().toISOString()
+  })
+  .eq('id', order.id)
+  .select('id, status')
+  .maybeSingle();
 
       if (updateError) {
         console.error('Order update error:', updateError);
