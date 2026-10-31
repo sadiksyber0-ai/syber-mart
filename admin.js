@@ -2466,8 +2466,9 @@ async function openOrdersPanel() {
         return;
       }
 
-      order.status = newStatus;
-      message.textContent = 'Order status updated.';
+      order.status = updatedOrder.status;
+select.value = updatedOrder.status;
+message.textContent = 'Saved status: ' + updatedOrder.status;
       saveBtn.disabled = false;
     });
 
