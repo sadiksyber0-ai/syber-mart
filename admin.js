@@ -2428,7 +2428,15 @@ async function openOrdersPanel() {
     
 <label>Update order status</label>
 <select class="orderStatusSelect">
-  ${['pending', 'processing', 'shipped', 'available_for_pickup', 'Delivered', 'cancelled']
+  $[
+  'pending',
+  'confirmed',
+  'processing',
+  'shipped',
+  'available_for_pickup',
+  'delivered',
+  'cancelled'
+]
     .map(s => `<option value="${s}" ${order.status === s ? 'selected' : ''}>${s === 'available_for_pickup' ? 'Available for Pickup' : s.charAt(0).toUpperCase() + s.slice(1)}</option>`)
     .join('')}
 </select>
