@@ -2443,34 +2443,62 @@ async function openOrdersPanel() {
     const saveBtn = card.querySelector('.saveOrderStatusBtn');
     const message = card.querySelector('.orderUpdateMessage');
 
-    saveBtn.addEventListener('click', async () => {
-      const newStatus = select.value;
 
-      saveBtn.disabled = true;
-      message.textContent = 'Saving...';
+saveBtn.addEventListener('click', async () => {
+  const newStatus = select.value;
 
-      const { data: updatedOrder, error: updateError } = await supabase
-  .from('orders')
-  .update({
-    status: newStatus,
-    updated_at: new Date().toISOString()
-  })
-  .eq('id', order.id)
-  .select('id, status')
-  .maybeSingle();
+  saveBtn.disabled = true;
+  message.textContent = 'Saving...';
 
-      if (updateError) {
-        console.error('Order update error:', updateError);
-        message.textContent = 'Could not update: ' + updateError.message;
-        saveBtn.disabled = false;
-        return;
-      }
+  try {
+    const updateRequest = supabase
+      .from('orders')
+      .update({
+        status: newStatus,
+        updated_at: new Date().toISOString()
+      })
+      .eq('id', order.id)
+      .select('id, status')
+      .maybeSingle();
 
-      order.status = updatedOrder.status;
-select.value = updatedOrder.status;
-message.textContent = 'Saved status: ' + updatedOrder.status;
-      saveBtn.disabled = false;
-    });
+    const { data: updatedOrder, error: updateError } =
+      await Promise.race([
+        updateRequest,
+        new Promise((_, reject) =>
+          setTimeout(
+            () => reject(new Error('Request timed out after 15 seconds. Check your connection or Supabase.')),
+            15000
+          )
+        )
+      ]);
+
+    if (updateError) {
+      throw updateError;
+    }
+
+    if (!updatedOrder) {
+      message.textContent =
+        'No order was updated. Check Supabase permissions and the order ID.';
+      return;
+    }
+
+    order.status = updatedOrder.status;
+    select.value = updatedOrder.status;
+
+    message.textContent =
+      'Saved status: ' + updatedOrder.status;
+
+  } catch (error) {
+    console.error('Order status update failed:', error);
+
+    message.textContent =
+      'Update failed: ' + (error.message || String(error));
+
+  } finally {
+    saveBtn.disabled = false;
+  }
+});
+
 
     list.appendChild(card);
   });
